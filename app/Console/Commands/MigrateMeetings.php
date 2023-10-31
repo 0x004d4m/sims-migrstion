@@ -51,25 +51,25 @@ class MigrateMeetings extends Command
         foreach (Meeting::get() as $Meeting) {
             if (Locations::where('name', $Meeting->location)->count() == 0) {
                 Locations::create([
-                    'name' => $Meeting->location,
-                    'description' => $Meeting->location,
+                    'name' => str_replace("'","",str_replace('"','',$Meeting->location)),
+                    'description' => str_replace("'","",str_replace('"','',$Meeting->location)),
                     'tenant_id' => 1,
                 ]);
             }
             Meetings::create([
-                'id' => $Meeting->id,
-                'title' => $Meeting->title,
-                'location' => $Meeting->location,
-                'description' => $Meeting->description,
+                'id' => str_replace("'","",str_replace('"','',$Meeting->id)),
+                'title' => str_replace("'","",str_replace('"','',$Meeting->title)),
+                'location' => str_replace("'","",str_replace('"','',$Meeting->location)),
+                'description' => str_replace("'","",str_replace('"','',$Meeting->description)),
                 'tenant_id' => 1,
-                'location_id' => Locations::where('name', $Meeting->location)->first()->id,
-                'related_document' => $Meeting->document ? (Document::where('id', $Meeting->document->id)->first() ? (Document::where('id', $Meeting->document->id)->first()->file_name) : null) : null,
+                'location_id' => Locations::where('name', str_replace("'","",str_replace('"','',$Meeting->location)))->first()->id,
+                'related_document' => $Meeting->document ? (Document::where('id', $Meeting->document->id)->first() ? (str_replace("'", "", str_replace('"', '', Document::where('id', $Meeting->document->id)->first()->file_name))) : null) : null,
                 'status' => "Held Meeting",
                 'meeting_start_date' => $Meeting->start_time,
-                'meeting_end_date' => $Meeting->end_time
+                'meeting_end_date' => $Meeting->end_time,
             ]);
-            if (MeetingLead::where('meeting_id', $Meeting->id)->count() > 0) {
-                foreach (MeetingLead::where('meeting_id', $Meeting->id)->get() as $MeetingLead) {
+            if (MeetingLead::where('meeting_id', str_replace("'","",str_replace('"','',$Meeting->id)))->count() > 0) {
+                foreach (MeetingLead::where('meeting_id', str_replace("'","",str_replace('"','',$Meeting->id)))->get() as $MeetingLead) {
                     MeetingsInvitedModels::create([
                         'invited_type' => meetings_invited_models_invited_type("Leads"),
                         'invited_id' => $MeetingLead->lead_id,
@@ -77,8 +77,8 @@ class MigrateMeetings extends Command
                     ]);
                 }
             }
-            if (MeetingUser::where('meeting_id', $Meeting->id)->count() > 0) {
-                foreach (MeetingUser::where('meeting_id', $Meeting->id)->get() as $MeetingUser) {
+            if (MeetingUser::where('meeting_id', str_replace("'","",str_replace('"','',$Meeting->id)))->count() > 0) {
+                foreach (MeetingUser::where('meeting_id', str_replace("'","",str_replace('"','',$Meeting->id)))->get() as $MeetingUser) {
                     MeetingsInvitedUsers::create([
                         'invited_user_type' => meetings_invited_users_invited_user_type("Users"),
                         'invited_user_id' => $MeetingUser->user_id,
@@ -86,8 +86,8 @@ class MigrateMeetings extends Command
                     ]);
                 }
             }
-            if (MeetingContact::where('meeting_id', $Meeting->id)->count() > 0) {
-                foreach (MeetingContact::where('meeting_id', $Meeting->id)->get() as $MeetingContact) {
+            if (MeetingContact::where('meeting_id', str_replace("'","",str_replace('"','',$Meeting->id)))->count() > 0) {
+                foreach (MeetingContact::where('meeting_id', str_replace("'","",str_replace('"','',$Meeting->id)))->get() as $MeetingContact) {
                     MeetingsInvitedModels::create([
                         'invited_type' => meetings_invited_models_invited_type("Contacts"),
                         'invited_id' => $MeetingContact->contact_id,
@@ -95,8 +95,8 @@ class MigrateMeetings extends Command
                     ]);
                 }
             }
-            if (MeetingSupplierContact::where('meeting_id', $Meeting->id)->count() > 0) {
-                foreach (MeetingSupplierContact::where('meeting_id', $Meeting->id)->get() as $MeetingSupplierContact) {
+            if (MeetingSupplierContact::where('meeting_id', str_replace("'","",str_replace('"','',$Meeting->id)))->count() > 0) {
+                foreach (MeetingSupplierContact::where('meeting_id', str_replace("'","",str_replace('"','',$Meeting->id)))->get() as $MeetingSupplierContact) {
                     MeetingsInvitedModels::create([
                         'invited_type' => meetings_invited_models_invited_type("SupplierContacts"),
                         'invited_id' => $MeetingSupplierContact->supplier_contact_id,

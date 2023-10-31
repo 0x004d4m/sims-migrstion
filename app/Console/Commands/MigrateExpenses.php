@@ -51,9 +51,9 @@ class MigrateExpenses extends Command
         $progress->start();
         foreach (ExpensesContact::get() as $ExpensesContact) {
             if ($ExpensesContact->expensesCategory) {
-                if (ExpensesCategories::where('name', $ExpensesContact->expensesCategory->description)->count() == 0) {
+                if (ExpensesCategories::where('name', str_replace("'","",str_replace('"','',$ExpensesContact->expensesCategory->description)))->count() == 0) {
                     ExpensesCategories::create([
-                        'name' => $ExpensesContact->expensesCategory->description,
+                        'name' => str_replace("'","",str_replace('"','',$ExpensesContact->expensesCategory->description)),
                         'tenant_id' => 1,
                     ]);
                 }
@@ -66,9 +66,9 @@ class MigrateExpenses extends Command
                 }
             }
             if ($ExpensesContact->expensesMode) {
-                if (ExpensesModes::where('name', $ExpensesContact->expensesMode->description)->count() == 0) {
+                if (ExpensesModes::where('name', str_replace("'","",str_replace('"','',$ExpensesContact->expensesMode->description)))->count() == 0) {
                     ExpensesModes::create([
-                        'name' => $ExpensesContact->expensesMode->description,
+                        'name' => str_replace("'","",str_replace('"','',$ExpensesContact->expensesMode->description)),
                     ]);
                 }
             } else {
@@ -78,7 +78,7 @@ class MigrateExpenses extends Command
                     ]);
                 }
             }
-            $currency = $ExpensesContact->currency ? (Currencies::where('code', $ExpensesContact->currency->currency_code)->first()->id) : 1;
+            $currency = $ExpensesContact->currency ? (Currencies::where('code', str_replace("'","",str_replace('"','',$ExpensesContact->currency->currency_code)))->first()->id) : 1;
             $country = $ExpensesContact->addressDetail ? $ExpensesContact->addressDetail->country_id : 1;
             if (Locations::where('country_id', $country)->where('currency_id', $currency)->count() == 0) {
                 $Location = Locations::create([
@@ -97,36 +97,36 @@ class MigrateExpenses extends Command
             ExpensesAccounts::create([
                 'id' => $ExpensesContact->id,
                 'location_id' => $Location->id,
-                'expenses_category_id' => $ExpensesContact->expensesCategory ? ExpensesCategories::where('name', $ExpensesContact->expensesCategory->description)->first()->id : ExpensesCategories::where('name', "-")->first()->id,
-                'expenses_mode_id' => $ExpensesContact->expensesMode ? ExpensesModes::where('name', $ExpensesContact->expensesMode->description)->first()->id : ExpensesModes::where('name', "-")->first()->id,
+                'expenses_category_id' => $ExpensesContact->expensesCategory ? ExpensesCategories::where('name', str_replace("'","",str_replace('"','',$ExpensesContact->expensesCategory->description)))->first()->id : ExpensesCategories::where('name', "-")->first()->id,
+                'expenses_mode_id' => $ExpensesContact->expensesMode ? ExpensesModes::where('name', str_replace("'","",str_replace('"','',$ExpensesContact->expensesMode->description)))->first()->id : ExpensesModes::where('name', "-")->first()->id,
                 'assigned_user_id' => 1,
                 'tenant_id' => 1,
                 'organisation_id' => null,
-                'first_name' => $ExpensesContact->first_name,
-                'last_name' => $ExpensesContact->last_name,
-                'description' => $ExpensesContact->description,
+                'first_name' => str_replace("'","",str_replace('"','',$ExpensesContact->first_name)),
+                'last_name' => str_replace("'","",str_replace('"','',$ExpensesContact->last_name)),
+                'description' => str_replace("'","",str_replace('"','',$ExpensesContact->description)),
                 'tax_free' => $ExpensesContact->is_tax_free,
-                'primary_email' => $ExpensesContact->reachDetail ? $ExpensesContact->reachDetail->email : null,
-                'primary_mobile' => $ExpensesContact->reachDetail ? $ExpensesContact->reachDetail->mobile : null,
-                'primary_phone' => $ExpensesContact->reachDetail ? $ExpensesContact->reachDetail->phone : null,
-                'primary_fax' => $ExpensesContact->reachDetail ? $ExpensesContact->reachDetail->fax : null,
-                'website' => $ExpensesContact->reachDetail ? $ExpensesContact->reachDetail->website : null,
-                'brand_name' => $ExpensesContact->brand_name,
+                'primary_email' => $ExpensesContact->reachDetail ? str_replace("'","",str_replace('"','',$ExpensesContact->reachDetail->email)) : null,
+                'primary_mobile' => $ExpensesContact->reachDetail ? str_replace("'","",str_replace('"','',$ExpensesContact->reachDetail->mobile)) : null,
+                'primary_phone' => $ExpensesContact->reachDetail ? str_replace("'","",str_replace('"','',$ExpensesContact->reachDetail->phone)) : null,
+                'primary_fax' => $ExpensesContact->reachDetail ? str_replace("'","",str_replace('"','',$ExpensesContact->reachDetail->fax)) : null,
+                'website' => $ExpensesContact->reachDetail ? str_replace("'","",str_replace('"','',$ExpensesContact->reachDetail->website)) : null,
+                'brand_name' => str_replace("'","",str_replace('"','',$ExpensesContact->brand_name)),
                 'tax_number' => $ExpensesContact->tax_number,
-                'organization_name' => $ExpensesContact->organization_name,
+                'organization_name' => str_replace("'","",str_replace('"','',$ExpensesContact->organization_name)),
                 'starting_balance' => $ExpensesContact->starting_balance,
                 'starting_balance_date' => $ExpensesContact->starting_balance_date,
                 'currency_id' => $currency,
-                'account_number' => $ExpensesContact->account_number,
+                'account_number' => str_replace("'","",str_replace('"','',$ExpensesContact->account_number)),
             ]);
             if ($ExpensesContact->addressDetail) {
                 ExpensesAccountAddresses::create([
                     'billing_country_id' => $ExpensesContact->addressDetail->country_id,
-                    'billing_state' => $ExpensesContact->addressDetail->state,
-                    'billing_postal_code' => $ExpensesContact->addressDetail->postal_code,
-                    'billing_address' => $ExpensesContact->addressDetail->address,
-                    'billing_city' => $ExpensesContact->addressDetail->city,
-                    'billing_p_o_box' => $ExpensesContact->addressDetail->post_office_box,
+                    'billing_state' => str_replace("'","",str_replace('"','',$ExpensesContact->addressDetail->state)),
+                    'billing_postal_code' => str_replace("'","",str_replace('"','',$ExpensesContact->addressDetail->postal_code)),
+                    'billing_address' => str_replace("'","",str_replace('"','',$ExpensesContact->addressDetail->address)),
+                    'billing_city' => str_replace("'","",str_replace('"','',$ExpensesContact->addressDetail->city)),
+                    'billing_p_o_box' => str_replace("'","",str_replace('"','',$ExpensesContact->addressDetail->post_office_box)),
                     'expenses_account_id' => $ExpensesContact->id,
                 ]);
             }
@@ -143,9 +143,9 @@ class MigrateExpenses extends Command
         $progress->start();
         foreach (ExpensesVoucher::get() as $ExpensesVoucher) {
             if ($ExpensesVoucher->supplierInvoiceStatusOption) {
-                if (PurchaseOrderInvoiceStatuses::where('name', $ExpensesVoucher->supplierInvoiceStatusOption->description)->count() == 0) {
+                if (PurchaseOrderInvoiceStatuses::where('name', str_replace("'","",str_replace('"','',$ExpensesVoucher->supplierInvoiceStatusOption->description)))->count() == 0) {
                     PurchaseOrderInvoiceStatuses::create([
-                        'name' => $ExpensesVoucher->supplierInvoiceStatusOption->description,
+                        'name' => str_replace("'","",str_replace('"','',$ExpensesVoucher->supplierInvoiceStatusOption->description)),
                         'tenant_id' => 1,
                     ]);
                 }
@@ -157,7 +157,7 @@ class MigrateExpenses extends Command
                     ]);
                 }
             }
-            $currency = $ExpensesVoucher->currency ? (Currencies::where('code', $ExpensesVoucher->currency->currency_code)->first()->id) : 1;
+            $currency = $ExpensesVoucher->currency ? (Currencies::where('code', str_replace("'","",str_replace('"','',$ExpensesVoucher->currency->currency_code)))->first()->id) : 1;
             $country = $ExpensesVoucher->addressDetail ? $ExpensesVoucher->addressDetail->country_id : 1;
             if (Locations::where('country_id', $country)->where('currency_id', $currency)->count() == 0) {
                 $Location = Locations::create([
@@ -176,19 +176,19 @@ class MigrateExpenses extends Command
             ExpensesVouchers::create([
                 'id' => $ExpensesVoucher->id,
                 'location_id' => $Location->id,
-                'supplier_invoice_status_id' => $ExpensesVoucher->supplierInvoiceStatusOption ? PurchaseOrderInvoiceStatuses::where('name', $ExpensesVoucher->supplierInvoiceStatusOption->description)->count() : PurchaseOrderInvoiceStatuses::where('name', "-")->count(),
+                'supplier_invoice_status_id' => $ExpensesVoucher->supplierInvoiceStatusOption ? PurchaseOrderInvoiceStatuses::where('name', str_replace("'","",str_replace('"','',$ExpensesVoucher->supplierInvoiceStatusOption->description)))->count() : PurchaseOrderInvoiceStatuses::where('name', "-")->count(),
                 'assigned_user_id' => 1,
                 'currency_id' => $currency,
                 'expenses_contact_id' => $ExpensesVoucher->expensesContact ? $ExpensesVoucher->expensesContact->id : null,
                 'expenses_organisation_id' => $ExpensesVoucher->expensesOrganisation ? $ExpensesVoucher->expensesOrganisation->id : null,
-                'subject' => $ExpensesVoucher->subject,
-                'number' => $ExpensesVoucher->number,
+                'subject' => str_replace("'","",str_replace('"','',$ExpensesVoucher->subject)),
+                'number' => str_replace("'","",str_replace('"','',$ExpensesVoucher->number)),
                 'date' => $ExpensesVoucher->invoice_date,
                 'subtotal_amount' => $ExpensesVoucher->subtotal_amount,
                 'sales_tax_percentage' => $ExpensesVoucher->sales_tax_percentage,
                 'total_amount' => $ExpensesVoucher->total_amount,
-                'description' => $ExpensesVoucher->description,
-                'organization_name' => $ExpensesVoucher->expensesOrganisation ? $ExpensesVoucher->expensesOrganisation->brand_name : null,
+                'description' => str_replace("'","",str_replace('"','',$ExpensesVoucher->description)),
+                'organization_name' => $ExpensesVoucher->expensesOrganisation ? str_replace("'","",str_replace('"','',$ExpensesVoucher->expensesOrganisation->brand_name)) : null,
                 'tenant_id' => 1,
                 'type' => $ExpensesVoucher->is_cash_expenses == 1 ? 'Credit' : 'Debit',
             ]);
@@ -205,7 +205,7 @@ class MigrateExpenses extends Command
         $progress = progress(label: 'Migrating Expenses Payment Vouchers', steps: ExpensesPaymentVoucher::count());
         $progress->start();
         foreach (ExpensesPaymentVoucher::get() as $ExpensesPaymentVoucher) {
-            $currency = $ExpensesPaymentVoucher->currency ? (Currencies::where('code', $ExpensesPaymentVoucher->currency->currency_code)->first()->id) : 1;
+            $currency = $ExpensesPaymentVoucher->currency ? (Currencies::where('code', str_replace("'","",str_replace('"','',$ExpensesPaymentVoucher->currency->currency_code)))->first()->id) : 1;
             $country = $ExpensesPaymentVoucher->expensesInvoice ? ($ExpensesPaymentVoucher->expensesInvoice->addressDetail ? $ExpensesPaymentVoucher->expensesInvoice->addressDetail->country_id : 1) : 1;
             if (Locations::where('country_id', $country)->where('currency_id', $currency)->count() == 0) {
                 $Location = Locations::create([
@@ -222,9 +222,9 @@ class MigrateExpenses extends Command
                 $Location = Locations::where('country_id', $country)->where('currency_id', $currency)->first();
             }
             if ($ExpensesPaymentVoucher->paymentMethod) {
-                if (PaymentMethods::where('name', $ExpensesPaymentVoucher->paymentMethod->name)->count() == 0) {
+                if (PaymentMethods::where('name', str_replace("'","",str_replace('"','',$ExpensesPaymentVoucher->paymentMethod->name)))->count() == 0) {
                     PaymentMethods::create([
-                        'name' => $ExpensesPaymentVoucher->paymentMethod->name,
+                        'name' => str_replace("'","",str_replace('"','',$ExpensesPaymentVoucher->paymentMethod->name)),
                     ]);
                 }
             } else {
@@ -242,14 +242,14 @@ class MigrateExpenses extends Command
                 'expenses_organisation_id' => $ExpensesPaymentVoucher->expenses_organization_id,
                 'expenses_voucher_id' => $ExpensesPaymentVoucher->expenses_invoice_id,
                 'currency_id' => $currency,
-                'payment_method_id' => $ExpensesPaymentVoucher->paymentMethod ? PaymentMethods::where('name', $ExpensesPaymentVoucher->paymentMethod->name)->first()->id : PaymentMethods::where('name', "-")->first()->id,
-                'subject' => $ExpensesPaymentVoucher->subject,
-                'number' => $ExpensesPaymentVoucher->number,
+                'payment_method_id' => $ExpensesPaymentVoucher->paymentMethod ? PaymentMethods::where('name', str_replace("'","",str_replace('"','',$ExpensesPaymentVoucher->paymentMethod->name)))->first()->id : PaymentMethods::where('name', "-")->first()->id,
+                'subject' => str_replace("'","",str_replace('"','',$ExpensesPaymentVoucher->subject)),
+                'number' => str_replace("'","",str_replace('"','',$ExpensesPaymentVoucher->number)),
                 'payment_date' => $ExpensesPaymentVoucher->payment_date,
-                'description' => $ExpensesPaymentVoucher->description,
+                'description' => str_replace("'","",str_replace('"','',$ExpensesPaymentVoucher->description)),
                 'cash_amount' => $ExpensesPaymentVoucher->cash_amount,
                 'total_amount' => $ExpensesPaymentVoucher->total_amount,
-                'organization_name' => $ExpensesPaymentVoucher->expensesOrganization? $ExpensesPaymentVoucher->expensesOrganization->brand_name : null,
+                'organization_name' => $ExpensesPaymentVoucher->expensesOrganization? str_replace("'","",str_replace('"','',$ExpensesPaymentVoucher->expensesOrganization->brand_name)) : null,
                 'tenant_id' => 1,
                 'type' => $ExpensesPaymentVoucher->expensesInvoice? ($ExpensesPaymentVoucher->expensesInvoice->is_cash_expenses == 1 ? 'Credit' : 'Debit'): 'Debit',
             ]);

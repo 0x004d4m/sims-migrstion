@@ -43,7 +43,7 @@ class MigrateVouchers extends Command
         $progress = progress(label: 'Migrating Vouchers From Payment Voucher Check Payments', steps: PaymentVoucherCheckPayment::count());
         $progress->start();
         foreach (PaymentVoucherCheckPayment::get() as $PaymentVoucherCheckPayment) {
-            $currency = $PaymentVoucherCheckPayment->currency ? (Currencies::where('code', $PaymentVoucherCheckPayment->currency->currency_code)->first()->id) : 1;
+            $currency = $PaymentVoucherCheckPayment->currency ? (Currencies::where('code', str_replace("'","",str_replace('"','',$PaymentVoucherCheckPayment->currency->currency_code)))->first()->id) : 1;
             $country = $PaymentVoucherCheckPayment->paymentVoucher ? ($PaymentVoucherCheckPayment->paymentVoucher->supplierContact ? ($PaymentVoucherCheckPayment->paymentVoucher->supplierContact->addressDetail ? ($PaymentVoucherCheckPayment->paymentVoucher->supplierContact->addressDetail->country_id) : 1) : 1) : 1;
             if (Locations::where('country_id', $country)->where('currency_id', $currency)->count() == 0) {
                 $Location = Locations::create([
@@ -71,10 +71,10 @@ class MigrateVouchers extends Command
                 'supplier_contact_id' => $PaymentVoucherCheckPayment->paymentVoucher ? $PaymentVoucherCheckPayment->paymentVoucher->supplier_contact_id : null,
                 'currency_id' => $currency,
                 'payment_method_id' => $PaymentVoucherCheckPayment->paymentVoucher ? $PaymentVoucherCheckPayment->paymentVoucher->payment_method_id : null,
-                'subject' => $PaymentVoucherCheckPayment->paymentVoucher ? $PaymentVoucherCheckPayment->paymentVoucher->subject : null,
-                'number' => $PaymentVoucherCheckPayment->paymentVoucher ? $PaymentVoucherCheckPayment->paymentVoucher->number : null,
+                'subject' => $PaymentVoucherCheckPayment->paymentVoucher ? str_replace("'","",str_replace('"','',$PaymentVoucherCheckPayment->paymentVoucher->subject)) : null,
+                'number' => $PaymentVoucherCheckPayment->paymentVoucher ? str_replace("'","",str_replace('"','',$PaymentVoucherCheckPayment->paymentVoucher->number)) : null,
                 'date_of_receipt' => $PaymentVoucherCheckPayment->paymentVoucher ? $PaymentVoucherCheckPayment->paymentVoucher->payment_date : null,
-                'description' => $PaymentVoucherCheckPayment->paymentVoucher ? $PaymentVoucherCheckPayment->paymentVoucher->description : null,
+                'description' => $PaymentVoucherCheckPayment->paymentVoucher ? str_replace("'","",str_replace('"','',$PaymentVoucherCheckPayment->paymentVoucher->description)) : null,
                 'cash_amount' => $PaymentVoucherCheckPayment->paymentVoucher ? $PaymentVoucherCheckPayment->paymentVoucher->cash_amount : null,
                 'total_amount' => $PaymentVoucherCheckPayment->paymentVoucher ? $PaymentVoucherCheckPayment->paymentVoucher->total_amount : null,
                 'tenant_id' => 1,
@@ -90,8 +90,8 @@ class MigrateVouchers extends Command
         $progress = progress(label: 'Migrating Vouchers From Receipt Voucher Check Payments', steps: ReceiptVoucherCheckPayment::count());
         $progress->start();
         foreach (ReceiptVoucherCheckPayment::get() as $ReceiptVoucherCheckPayment) {
-            $currency = $ReceiptVoucherCheckPayment->receiptVoucher ? ($ReceiptVoucherCheckPayment->receiptVoucher->currency ? (Currencies::where('code', $ReceiptVoucherCheckPayment->receiptVoucher->currency->currency_code)->first()->id) : 1) : 1;
-            $country = $ReceiptVoucherCheckPayment->receiptVoucher ? ($ReceiptVoucherCheckPayment->receiptVoucher->contact ? ($ReceiptVoucherCheckPayment->receiptVoucher->contact->person ? ($ReceiptVoucherCheckPayment->receiptVoucher->contact->person->addressDetail ? $ReceiptVoucherCheckPayment->receiptVoucher->contact->person->addressDetail->country_id : 1) : 1) : 1) : 1;
+            $currency = $ReceiptVoucherCheckPayment->receiptVoucher ? ($ReceiptVoucherCheckPayment->receiptVoucher->currency ? (Currencies::where('code', str_replace("'","",str_replace('"','',$ReceiptVoucherCheckPayment->receiptVoucher->currency->currency_code)))->first()->id) : 1) : 1;
+            $country = $ReceiptVoucherCheckPayment->receiptVoucher ? ($ReceiptVoucherCheckPayment->receiptVoucher->contact ? ($ReceiptVoucherCheckPayment->receiptVoucher->contact->person ? ($ReceiptVoucherCheckPayment->receiptVoucher->contact->person->addressDetail ? str_replace("'","",str_replace('"','',$ReceiptVoucherCheckPayment->receiptVoucher->contact->person->addressDetail->country_id)) : 1) : 1) : 1) : 1;
             if (Locations::where('country_id', $country)->where('currency_id', $currency)->count() == 0) {
                 $Location = Locations::create([
                     'name' => "-",
@@ -118,10 +118,10 @@ class MigrateVouchers extends Command
                 'supplier_contact_id' => null,
                 'currency_id' => $currency,
                 'payment_method_id' => $ReceiptVoucherCheckPayment->receiptVoucher ? $ReceiptVoucherCheckPayment->receiptVoucher->payment_method_id : null,
-                'subject' => $ReceiptVoucherCheckPayment->receiptVoucher ? $ReceiptVoucherCheckPayment->receiptVoucher->subject : null,
-                'number' => $ReceiptVoucherCheckPayment->receiptVoucher ? $ReceiptVoucherCheckPayment->receiptVoucher->number : null,
+                'subject' => $ReceiptVoucherCheckPayment->receiptVoucher ? str_replace("'","",str_replace('"','',$ReceiptVoucherCheckPayment->receiptVoucher->subject)) : null,
+                'number' => $ReceiptVoucherCheckPayment->receiptVoucher ? str_replace("'","",str_replace('"','',$ReceiptVoucherCheckPayment->receiptVoucher->number)) : null,
                 'date_of_receipt' => $ReceiptVoucherCheckPayment->receiptVoucher ? $ReceiptVoucherCheckPayment->receiptVoucher->date_of_receipt : null,
-                'description' => $ReceiptVoucherCheckPayment->receiptVoucher ? $ReceiptVoucherCheckPayment->receiptVoucher->description : null,
+                'description' => $ReceiptVoucherCheckPayment->receiptVoucher ? str_replace("'","",str_replace('"','',$ReceiptVoucherCheckPayment->receiptVoucher->description)) : null,
                 'cash_amount' => $ReceiptVoucherCheckPayment->receiptVoucher ? $ReceiptVoucherCheckPayment->receiptVoucher->cash_amount : null,
                 'total_amount' => $ReceiptVoucherCheckPayment->receiptVoucher ? $ReceiptVoucherCheckPayment->receiptVoucher->total_amount : null,
                 'tenant_id' => 1,

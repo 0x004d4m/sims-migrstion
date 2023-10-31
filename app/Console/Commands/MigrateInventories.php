@@ -69,9 +69,9 @@ class MigrateInventories extends Command
         $progress->start();
         foreach (Product::get() as $Product) {
             if ($Product->productCategoryOption) {
-                if (InventoryProductCategories::where('name', $Product->productCategoryOption->description)->count() == 0) {
+                if (InventoryProductCategories::where('name', str_replace("'","",str_replace('"','',$Product->productCategoryOption->description)))->count() == 0) {
                     InventoryProductCategories::create([
-                        'name' => $Product->productCategoryOption->description,
+                        'name' => str_replace("'","",str_replace('"','',$Product->productCategoryOption->description)),
                         'tenant_id' => 1,
                     ]);
                 }
@@ -84,9 +84,9 @@ class MigrateInventories extends Command
                 }
             }
             if ($Product->usageUnitOption) {
-                if (UsageUnits::where('name', $Product->usageUnitOption->description)->count() == 0) {
+                if (UsageUnits::where('name', str_replace("'","",str_replace('"','',$Product->usageUnitOption->description)))->count() == 0) {
                     UsageUnits::create([
-                        'name' => $Product->usageUnitOption->description,
+                        'name' => str_replace("'","",str_replace('"','',$Product->usageUnitOption->description)),
                         'tenant_id' => 1,
                     ]);
                 }
@@ -98,7 +98,7 @@ class MigrateInventories extends Command
                     ]);
                 }
             }
-            $currency = $Product->currency ? (Currencies::where('code', $Product->currency->currency_code)->first()->id) : 1;
+            $currency = $Product->currency ? (Currencies::where('code', str_replace("'","",str_replace('"','',$Product->currency->currency_code)))->first()->id) : 1;
             $country = $Product->supplierContact ? ($Product->supplierContact->addressDetail ? $Product->supplierContact->addressDetail->country_id : 1) : 1;
             if (Locations::where('country_id', $country)->where('currency_id', $currency)->count() == 0) {
                 $Location = Locations::create([
@@ -117,22 +117,22 @@ class MigrateInventories extends Command
             InventoryProducts::create([
                 'id' => $Product->id,
                 'location_id' => $Location->id,
-                'inventory_product_category_id' => $Product->productCategoryOption ? (InventoryProductCategories::where('name', $Product->productCategoryOption->description)->first()->id) : (InventoryProductCategories::where('name', "-")->first()->id),
-                'usage_unit_id' => $Product->usageUnitOption ? (UsageUnits::where('name', $Product->usageUnitOption->description)->first()->id) : (UsageUnits::where('name', "-")->first()->id),
+                'inventory_product_category_id' => $Product->productCategoryOption ? (InventoryProductCategories::where('name', str_replace("'","",str_replace('"','',$Product->productCategoryOption->description)))->first()->id) : (InventoryProductCategories::where('name', "-")->first()->id),
+                'usage_unit_id' => $Product->usageUnitOption ? (UsageUnits::where('name', str_replace("'","",str_replace('"','',$Product->usageUnitOption->description)))->first()->id) : (UsageUnits::where('name', "-")->first()->id),
                 'assigned_user_id' => 1,
                 'currency_id' => $currency,
-                'number' => $Product->number,
-                'manufacturer' => $Product->manufacturer,
+                'number' => str_replace("'","",str_replace('"','',$Product->number)),
+                'manufacturer' => str_replace("'","",str_replace('"','',$Product->manufacturer)),
                 'active' => $Product->is_active,
                 'expiry_date' => $Product->expiry_date,
                 'unit_price' => $Product->unit_price??0,
-                'name' => $Product->name,
+                'name' => str_replace("'","",str_replace('"','',$Product->name)),
                 'supplier_part_number' => $Product->supplier_part_number,
                 'manufacturer_part_number' => $Product->manufacturer_part_number,
-                'website' => $Product->website,
+                'website' => str_replace("'","",str_replace('"','',$Product->website)),
                 'quantity_in_stock' => $Product->quantity_in_stock,
                 'purchase_cost' => $Product->purchase_cost,
-                'description' => $Product->description,
+                'description' => str_replace("'","",str_replace('"','',$Product->description)),
                 'tenant_id' => 1,
                 'supplier_organisation_id' => $Product->supplier_organization_id,
                 'supplier_contact_id' => $Product->supplier_contact_id,
@@ -158,7 +158,7 @@ class MigrateInventories extends Command
                 'quantity' => $InvoiceProduct->quantity,
                 'unit_price' => $InvoiceProduct->unit_price,
                 'total_price' => null,
-                'description' => $InvoiceProduct->description,
+                'description' => str_replace("'","",str_replace('"','',$InvoiceProduct->description)),
                 'tenant_id' => 1,
                 'tax_rate' => null,
                 'sub_total_amount' => null,
@@ -227,7 +227,7 @@ class MigrateInventories extends Command
                 'quantity' => $QuoteProduct->quantity,
                 'unit_price' => $QuoteProduct->unit_price,
                 'total_price' => null,
-                'description' => $QuoteProduct->description,
+                'description' => str_replace("'","",str_replace('"','',$QuoteProduct->description)),
                 'tenant_id' => 1,
                 'tax_rate' => null,
                 'sub_total_amount' => null,
@@ -273,7 +273,7 @@ class MigrateInventories extends Command
                 'quantity' => $SalesOrderProduct->quantity,
                 'unit_price' => $SalesOrderProduct->unit_price,
                 'total_price' => null,
-                'description' => $SalesOrderProduct->description,
+                'description' => str_replace("'","",str_replace('"','',$SalesOrderProduct->description)),
                 'tenant_id' => 1,
                 'tax_rate' => null,
                 'sub_total_amount' => null,
@@ -296,7 +296,7 @@ class MigrateInventories extends Command
                 'quantity' => $SupplierInvoiceProduct->quantity,
                 'unit_price' => $SupplierInvoiceProduct->unit_price,
                 'total_price' => null,
-                'description' => $SupplierInvoiceProduct->description,
+                'description' => str_replace("'","",str_replace('"','',$SupplierInvoiceProduct->description)),
                 'tenant_id' => 1,
                 'tax_rate' => null,
                 'sub_total_amount' => null,
@@ -312,9 +312,9 @@ class MigrateInventories extends Command
         $progress->start();
         foreach (Service::get() as $Service) {
             if ($Service->serviceCategoryOption) {
-                if (InventoryServiceCategories::where('name', $Service->serviceCategoryOption->description)->count() == 0) {
+                if (InventoryServiceCategories::where('name', str_replace("'","",str_replace('"','',$Service->serviceCategoryOption->description)))->count() == 0) {
                     InventoryServiceCategories::create([
-                        'name' => $Service->serviceCategoryOption->description,
+                        'name' => str_replace("'","",str_replace('"','',$Service->serviceCategoryOption->description)),
                         'tenant_id' => 1,
                     ]);
                 }
@@ -327,9 +327,9 @@ class MigrateInventories extends Command
                 }
             }
             if ($Service->serviceUsageUnit) {
-                if (InventoryServiceUsageUnits::where('name', $Service->serviceUsageUnit->name)->count() == 0) {
+                if (InventoryServiceUsageUnits::where('name', str_replace("'","",str_replace('"','',$Service->serviceUsageUnit->name)))->count() == 0) {
                     InventoryServiceUsageUnits::create([
-                        'name' => $Service->serviceUsageUnit->name,
+                        'name' => str_replace("'","",str_replace('"','',$Service->serviceUsageUnit->name)),
                         'tenant_id' => 1,
                     ]);
                 }
@@ -341,22 +341,22 @@ class MigrateInventories extends Command
                     ]);
                 }
             }
-            $currency = $Service->currency ? (Currencies::where('code', $Service->currency->currency_code)->first()->id) : 1;
+            $currency = $Service->currency ? (Currencies::where('code', str_replace("'","",str_replace('"','',$Service->currency->currency_code)))->first()->id) : 1;
 
             InventoryServices::create([
                 'id' => $Service->id,
                 'location_id' => null,
-                'inventory_service_category_id' => $Service->serviceCategoryOption ? (InventoryServiceCategories::where('name', $Service->serviceCategoryOption->description)->first()->id) : (InventoryServiceCategories::where('name', "-")->first()->id),
-                'usage_unit_id' => $Service->serviceUsageUnit ? (InventoryServiceUsageUnits::where('name', $Service->serviceUsageUnit->name)->first()->id) : (InventoryServiceUsageUnits::where('name', "-")->first()->id),
+                'inventory_service_category_id' => $Service->serviceCategoryOption ? (InventoryServiceCategories::where('name', str_replace("'","",str_replace('"','',$Service->serviceCategoryOption->description)))->first()->id) : (InventoryServiceCategories::where('name', "-")->first()->id),
+                'usage_unit_id' => $Service->serviceUsageUnit ? (InventoryServiceUsageUnits::where('name', str_replace("'","",str_replace('"','',$Service->serviceUsageUnit->name)))->first()->id) : (InventoryServiceUsageUnits::where('name', "-")->first()->id),
                 'assigned_user_id' => 1,
                 'currency_id' => $currency,
                 'number' => $Service->number,
                 'number_of_units' => $Service->number_of_units,
-                'active' => $Service->is_active,
-                'name' => $Service->name,
-                'website' => $Service->website,
+                'active' => str_replace("'","",str_replace('"','',$Service->is_active)),
+                'name' => str_replace("'","",str_replace('"','',$Service->name)),
+                'website' => str_replace("'","",str_replace('"','',$Service->website)),
                 'purchase_cost' => $Service->purchase_cost,
-                'description' => $Service->description,
+                'description' => str_replace("'","",str_replace('"','',$Service->description)),
                 'tenant_id' => 1,
                 'unit_price' => $Service->service_price??0,
             ]);
@@ -381,7 +381,7 @@ class MigrateInventories extends Command
                 'quantity' => $QuoteService->quantity,
                 'unit_price' => $QuoteService->unit_price??0,
                 'total_price' => null,
-                'description' => $QuoteService->description,
+                'description' => str_replace("'","",str_replace('"','',$QuoteService->description)),
                 'tenant_id' => 1,
                 'tax_rate' => null,
                 'sub_total_amount' => null,
@@ -404,7 +404,7 @@ class MigrateInventories extends Command
                 'quantity' => $InvoiceService->quantity,
                 'unit_price' => $InvoiceService->unit_price??0,
                 'total_price' => null,
-                'description' => $InvoiceService->description,
+                'description' => str_replace("'","",str_replace('"','',$InvoiceService->description)),
                 'tenant_id' => 1,
                 'tax_rate' => null,
                 'sub_total_amount' => null,
@@ -427,7 +427,7 @@ class MigrateInventories extends Command
                 'quantity' => $SalesOrderService->quantity,
                 'unit_price' => $SalesOrderService->unit_price??0,
                 'total_price' => null,
-                'description' => $SalesOrderService->description,
+                'description' => str_replace("'","",str_replace('"','',$SalesOrderService->description)),
                 'tenant_id' => 1,
                 'tax_rate' => null,
                 'sub_total_amount' => null,
@@ -445,10 +445,10 @@ class MigrateInventories extends Command
             CustomItems::create([
                 'object_type' => custom_items_object_type("SupplierInvoices"),
                 'object_id' => $SupplierInvoiceCustomItem->supplier_invoice_id,
-                'name' => $SupplierInvoiceCustomItem->name,
+                'name' => str_replace("'","",str_replace('"','',$SupplierInvoiceCustomItem->name)),
                 'quantity' => $SupplierInvoiceCustomItem->quantity,
                 'unit_price' => $SupplierInvoiceCustomItem->unit_price??0,
-                'description' => $SupplierInvoiceCustomItem->description,
+                'description' => str_replace("'","",str_replace('"','',$SupplierInvoiceCustomItem->description)),
                 'total_price' => ($SupplierInvoiceCustomItem->unit_price??0 * $SupplierInvoiceCustomItem->quantity),
             ]);
             $progress->advance();
@@ -463,10 +463,10 @@ class MigrateInventories extends Command
             CustomItems::create([
                 'object_type' => custom_items_object_type("ExpensesVouchers"),
                 'object_id' => $ExpensesVoucherCustomItem->expenses_voucher_id,
-                'name' => $ExpensesVoucherCustomItem->name,
+                'name' => str_replace("'","",str_replace('"','',$ExpensesVoucherCustomItem->name)),
                 'quantity' => $ExpensesVoucherCustomItem->quantity,
                 'unit_price' => $ExpensesVoucherCustomItem->unit_price??0,
-                'description' => $ExpensesVoucherCustomItem->description,
+                'description' => str_replace("'","",str_replace('"','',$ExpensesVoucherCustomItem->description)),
                 'total_price' => ($ExpensesVoucherCustomItem->unit_price??0 * $ExpensesVoucherCustomItem->quantity),
             ]);
             $progress->advance();
@@ -481,10 +481,10 @@ class MigrateInventories extends Command
             CustomItems::create([
                 'object_type' => custom_items_object_type("CustomerInvoices"),
                 'object_id' => $InvoiceCustomItem->invoice_id,
-                'name' => $InvoiceCustomItem->name,
+                'name' => str_replace("'","",str_replace('"','',$InvoiceCustomItem->name)),
                 'quantity' => $InvoiceCustomItem->quantity,
                 'unit_price' => $InvoiceCustomItem->unit_price??0,
-                'description' => $InvoiceCustomItem->description,
+                'description' => str_replace("'","",str_replace('"','',$InvoiceCustomItem->description)),
                 'total_price' => ($InvoiceCustomItem->unit_price??0 * $InvoiceCustomItem->quantity),
             ]);
             $progress->advance();
@@ -499,10 +499,10 @@ class MigrateInventories extends Command
             CustomItems::create([
                 'object_type' => custom_items_object_type("PurchaseOrders"),
                 'object_id' => $PurchaseOrderCustomItem->purchase_order_id,
-                'name' => $PurchaseOrderCustomItem->name,
+                'name' => str_replace("'","",str_replace('"','',$PurchaseOrderCustomItem->name)),
                 'quantity' => $PurchaseOrderCustomItem->quantity,
                 'unit_price' => $PurchaseOrderCustomItem->unit_price??0,
-                'description' => $PurchaseOrderCustomItem->description,
+                'description' => str_replace("'","",str_replace('"','',$PurchaseOrderCustomItem->description)),
                 'total_price' => ($PurchaseOrderCustomItem->unit_price??0 * $PurchaseOrderCustomItem->quantity),
             ]);
             $progress->advance();
@@ -517,10 +517,10 @@ class MigrateInventories extends Command
             CustomItems::create([
                 'object_type' => custom_items_object_type("Quotes"),
                 'object_id' => $QuoteCustomItem->quote_id,
-                'name' => $QuoteCustomItem->name,
+                'name' => str_replace("'","",str_replace('"','',$QuoteCustomItem->name)),
                 'quantity' => $QuoteCustomItem->quantity,
                 'unit_price' => $QuoteCustomItem->unit_price??0,
-                'description' => $QuoteCustomItem->description,
+                'description' => str_replace("'","",str_replace('"','',$QuoteCustomItem->description)),
                 'total_price' => ($QuoteCustomItem->unit_price??0 * $QuoteCustomItem->quantity),
             ]);
             $progress->advance();
@@ -535,10 +535,10 @@ class MigrateInventories extends Command
             CustomItems::create([
                 'object_type' => custom_items_object_type("RequestForQuotations"),
                 'object_id' => $RequestForQuotationCustomItem->request_for_quotation_id,
-                'name' => $RequestForQuotationCustomItem->name,
+                'name' => str_replace("'","",str_replace('"','',$RequestForQuotationCustomItem->name)),
                 'quantity' => $RequestForQuotationCustomItem->quantity,
                 'unit_price' => $RequestForQuotationCustomItem->unitPrice??0,
-                'description' => $RequestForQuotationCustomItem->description,
+                'description' => str_replace("'","",str_replace('"','',$RequestForQuotationCustomItem->description)),
                 'total_price' => ($RequestForQuotationCustomItem->unitPrice??0 * $RequestForQuotationCustomItem->quantity),
             ]);
             $progress->advance();
@@ -553,10 +553,10 @@ class MigrateInventories extends Command
             CustomItems::create([
                 'object_type' => custom_items_object_type("SalesOrders"),
                 'object_id' => $SalesOrderCustomItem->sales_order_id,
-                'name' => $SalesOrderCustomItem->name,
+                'name' => str_replace("'","",str_replace('"','',$SalesOrderCustomItem->name)),
                 'quantity' => $SalesOrderCustomItem->quantity,
                 'unit_price' => $SalesOrderCustomItem->unit_price??0,
-                'description' => $SalesOrderCustomItem->description,
+                'description' => str_replace("'","",str_replace('"','',$SalesOrderCustomItem->description)),
                 'total_price' => ($SalesOrderCustomItem->unit_price??0 * $SalesOrderCustomItem->quantity),
             ]);
             $progress->advance();
