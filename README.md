@@ -1,4 +1,9 @@
 
+# SIMS Data Migration
+
+Migrate Data From Old Database and Schema To New Database
+
+
 ## Installation
 
 Install the project:
@@ -33,6 +38,9 @@ Fill env file with old and new DB and Schema info
 ## Run All Migrations
 
 Run Migration 
+
+The Current Database must be Empty
+
 ```bash
   php artisan sims:migrate
 ```
