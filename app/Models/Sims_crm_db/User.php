@@ -23,7 +23,7 @@ class User extends Model
 
 	public function addressDetail(){return $this->belongsTo(AddressDetails::class, 'address_details_id', 'id');}
 
-	public function UserDocuments(){return $this->hasMany(UserDocument::class, 'id', 'id');}
+	public function UserDocument(){return $this->hasOne(UserDocument::class, 'id', 'id');}
 
 	public function userAuthenticationDetail(){return $this->belongsTo(\App\Models\Crm_setting_schema\UserAuthenticationDetails::class, 'user_authentication_details_id', 'id');}
 

@@ -19,7 +19,7 @@ class Lead extends Model
 
 	public function person(){return $this->belongsTo(Person::class, 'person_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
 	public function leadStatusOption(){return $this->belongsTo(ListOption::class, 'lead_status_option_id', 'id');}
 

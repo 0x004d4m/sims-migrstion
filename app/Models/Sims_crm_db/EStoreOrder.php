@@ -27,5 +27,5 @@ class EStoreOrder extends Model
 
 	public function eStoreDivision(){return $this->belongsTo(EStoreDivision::class, 'e_store_division_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 }

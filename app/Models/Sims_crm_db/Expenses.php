@@ -21,7 +21,7 @@ class Expenses extends Model
 
 	public function currency(){return $this->belongsTo(Currency::class, 'currency_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
-	public function ListOptions(){return $this->hasMany(ListOption::class, 'category', 'id');}
+	public function ListOption(){return $this->hasOne(ListOption::class, 'category', 'id');}
 }

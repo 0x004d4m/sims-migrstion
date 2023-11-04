@@ -17,7 +17,7 @@ class ViewSetting extends Model
 	protected $fillable = ['id','form_id','view_conditions_script','subform_id'];
 
 
-	public function Settings(){return $this->hasMany(Setting::class, 'id', 'id');}
+	public function Setting(){return $this->hasOne(Setting::class, 'id', 'id');}
 
 	public function form(){return $this->belongsTo(FormSetting::class, 'form_id', 'id');}
 

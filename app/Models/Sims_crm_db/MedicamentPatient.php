@@ -21,5 +21,5 @@ class MedicamentPatient extends Model
 
 	public function medicalFile(){return $this->belongsTo(MedicalFile::class, 'medical_file_id', 'id');}
 
-	public function Products(){return $this->hasMany(Product::class, 'medicament_product', 'id');}
+	public function Product(){return $this->hasOne(Product::class, 'medicament_product', 'id');}
 }

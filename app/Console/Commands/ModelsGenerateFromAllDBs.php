@@ -153,8 +153,8 @@ class ModelsGenerateFromAllDBs extends Command
                     $relationships[] = "\n\tpublic function $methodName(){return \$this->belongsTo($referencedTable2::class, '$columnName', '$REFERENCEDCOLUMNNAME');}\n";
                 }
             } else {
-                $methodName = Str::plural($referencedTable);
-                $relationships[] = "\n\tpublic function $methodName(){return \$this->hasMany($referencedTable2::class, '$columnName', '$REFERENCEDCOLUMNNAME');}\n";
+                $methodName = Str::singular($referencedTable);
+                $relationships[] = "\n\tpublic function $methodName(){return \$this->hasOne($referencedTable2::class, '$columnName', '$REFERENCEDCOLUMNNAME');}\n";
             }
         }
 

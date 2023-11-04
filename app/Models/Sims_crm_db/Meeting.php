@@ -17,7 +17,5 @@ class Meeting extends Model
 	protected $fillable = ['id','end_time','location','title','start_time','description','document_id','related_document_form_id'];
 
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
-
-	public function document(){return $this->belongsTo(Document::class, 'document_id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 }

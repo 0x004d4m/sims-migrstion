@@ -19,9 +19,9 @@ class Tenant extends Model
 
 	public function tenantOutgoingMailServerConfiguration(){return $this->belongsTo(TenantOutgoingMailServerConfiguration::class, 'tenant_outgoing_mail_server_configuration_id', 'id');}
 
-	public function TenantEStoreConfigurations(){return $this->hasMany(TenantEStoreConfiguration::class, 'tenant_e_store_configuration', 'id');}
+	public function TenantEStoreConfiguration(){return $this->hasOne(TenantEStoreConfiguration::class, 'tenant_e_store_configuration', 'id');}
 
-	public function TenantElectronicsStoreConfigurations(){return $this->hasMany(TenantElectronicsStoreConfiguration::class, 'tenant_electronics_store_configuration', 'id');}
+	public function TenantElectronicsStoreConfiguration(){return $this->hasOne(TenantElectronicsStoreConfiguration::class, 'tenant_electronics_store_configuration', 'id');}
 
-	public function TenantMailchimpAccountInformations(){return $this->hasMany(TenantMailchimpAccountInformation::class, 'tenant_mailchimp_account_information', 'id');}
+	public function TenantMailchimpAccountInformation(){return $this->hasOne(TenantMailchimpAccountInformation::class, 'tenant_mailchimp_account_information', 'id');}
 }

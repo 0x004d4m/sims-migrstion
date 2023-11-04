@@ -25,7 +25,7 @@ class SalesOrder extends Model
 
 	public function contact(){return $this->belongsTo(Contact::class, 'contact_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
 	public function organization(){return $this->belongsTo(Organization::class, 'organization_id', 'id');}
 

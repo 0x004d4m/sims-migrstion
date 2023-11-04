@@ -17,7 +17,7 @@ class RegistrationPatient extends Model
 	protected $fillable = ['sequence_id','id','case_status_id','patient_id','chief_complaint_id','clinical_signs_id'];
 
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
 	public function chiefComplaint(){return $this->belongsTo(ChiefComplaint::class, 'chief_complaint_id', 'id');}
 

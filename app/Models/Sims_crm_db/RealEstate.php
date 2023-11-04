@@ -17,7 +17,7 @@ class RealEstate extends Model
 	protected $fillable = ['area','description','location','name','number','price','is_sold','id','currency_id','real_estate_category_option_id'];
 
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
 	public function currency(){return $this->belongsTo(Currency::class, 'currency_id', 'id');}
 

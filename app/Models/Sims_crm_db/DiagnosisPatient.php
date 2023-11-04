@@ -19,9 +19,9 @@ class DiagnosisPatient extends Model
 
 	public function diagnosisOption(){return $this->belongsTo(ListOption::class, 'diagnosis_option_id', 'id');}
 
-	public function Departments(){return $this->hasMany(Department::class, 'department', 'id');}
+	public function Department(){return $this->hasOne(Department::class, 'department', 'id');}
 
 	public function medicalFile(){return $this->belongsTo(MedicalFile::class, 'medical_file_id', 'id');}
 
-	public function Diseases(){return $this->hasMany(Disease::class, 'disease', 'id');}
+	public function Disease(){return $this->hasOne(Disease::class, 'disease', 'id');}
 }

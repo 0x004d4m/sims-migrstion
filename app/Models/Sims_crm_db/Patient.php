@@ -21,5 +21,5 @@ class Patient extends Model
 
 	public function nationalityOption(){return $this->belongsTo(ListOption::class, 'nationality_option_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 }

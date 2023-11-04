@@ -23,5 +23,5 @@ class ProjectTask extends Model
 
 	public function projectTaskStatusOption(){return $this->belongsTo(ListOption::class, 'project_task_status_option_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 }

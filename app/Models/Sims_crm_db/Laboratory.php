@@ -19,7 +19,7 @@ class Laboratory extends Model
 
 	public function patient(){return $this->belongsTo(Patient::class, 'patient_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
 	public function medicalFile(){return $this->belongsTo(MedicalFile::class, 'medical_file_id', 'id');}
 }

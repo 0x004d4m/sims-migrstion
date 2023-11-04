@@ -19,7 +19,7 @@ class DialogSetting extends Model
 
 	public function targetForm(){return $this->belongsTo(FormSetting::class, 'target_form_id', 'id');}
 
-	public function Settings(){return $this->hasMany(Setting::class, 'id', 'id');}
+	public function Setting(){return $this->hasOne(Setting::class, 'id', 'id');}
 
 	public function parentForm(){return $this->belongsTo(FormSetting::class, 'parent_form_id', 'id');}
 }

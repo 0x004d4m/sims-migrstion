@@ -21,7 +21,7 @@ class Maid extends Model
 
 	public function maidNationalityOption(){return $this->belongsTo(ListOption::class, 'maid_nationality_option_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
 	public function maidMaritalStatusOption(){return $this->belongsTo(ListOption::class, 'maid_marital_status_option_id', 'id');}
 }

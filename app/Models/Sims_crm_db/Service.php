@@ -19,7 +19,7 @@ class Service extends Model
 
 	public function currency(){return $this->belongsTo(Currency::class, 'currency_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
 	public function serviceUsageUnit(){return $this->belongsTo(ServiceUsageUnit::class, 'service_usage_unit_id', 'id');}
 

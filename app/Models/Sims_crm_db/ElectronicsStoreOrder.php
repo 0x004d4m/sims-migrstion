@@ -19,7 +19,7 @@ class ElectronicsStoreOrder extends Model
 
 	public function electronicsStoreUser(){return $this->belongsTo(ElectronicsStoreUser::class, 'electronics_store_user_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
 	public function electronicsStoreOrderStatus(){return $this->belongsTo(ElectronicsStoreOrderStatus::class, 'electronics_store_order_status_id', 'id');}
 

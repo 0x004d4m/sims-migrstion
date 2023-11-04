@@ -27,7 +27,7 @@ class ElectronicsStoreProduct extends Model
 
 	public function electronicsStoreProductStockStatus(){return $this->belongsTo(ElectronicsStoreProductStockStatus::class, 'electronics_store_product_stock_status_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
 	public function electronicsStoreWeightClass(){return $this->belongsTo(ElectronicsStoreWeightClass::class, 'electronics_store_weight_class_id', 'id');}
 }

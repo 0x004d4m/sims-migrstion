@@ -19,7 +19,7 @@ class ExpensesContact extends Model
 
 	public function expensesCategoryOption(){return $this->belongsTo(ListOption::class, 'expenses_category_option_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
 	public function addressDetail(){return $this->belongsTo(AddressDetails::class, 'address_details_id', 'id');}
 

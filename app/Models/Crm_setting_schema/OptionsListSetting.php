@@ -17,5 +17,5 @@ class OptionsListSetting extends Model
 	protected $fillable = ['id'];
 
 
-	public function Settings(){return $this->hasMany(Setting::class, 'id', 'id');}
+	public function Setting(){return $this->hasOne(Setting::class, 'id', 'id');}
 }

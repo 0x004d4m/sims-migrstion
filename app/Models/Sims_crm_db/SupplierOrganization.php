@@ -23,7 +23,7 @@ class SupplierOrganization extends Model
 
 	public function reachDetail(){return $this->belongsTo(ReachDetails::class, 'reach_details_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
 	public function supplierCategoryOption(){return $this->belongsTo(ListOption::class, 'supplier_category_option_id', 'id');}
 }

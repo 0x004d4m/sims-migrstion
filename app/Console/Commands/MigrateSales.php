@@ -11,7 +11,6 @@ use App\Models\Sims_crm_db\{
 };
 use App\Models\Sims_new\{
     Currencies,
-    Locations,
     Opportunities,
     OpportunitySources,
     Quotes,
@@ -56,9 +55,9 @@ class MigrateSales extends Command
         $progress->start();
         foreach ($Opportunities as $Opportunity) {
             if ($Opportunity->opportunitySourceOption) {
-                if (OpportunitySources::where('name', str_replace("'","",str_replace('"','',$Opportunity->opportunitySourceOption->description)))->count() == 0) {
+                if (OpportunitySources::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Opportunity->opportunitySourceOption->description)))))->count() == 0) {
                     OpportunitySources::create([
-                        'name' => str_replace("'","",str_replace('"','',$Opportunity->opportunitySourceOption->description)),
+                        'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Opportunity->opportunitySourceOption->description)))),
                         'tenant_id' => 1,
                     ]);
                 }
@@ -71,7 +70,7 @@ class MigrateSales extends Command
                 }
             }
             if ($Opportunity->salesStageOption) {
-                if (SalesStages::where('name', str_replace("'","",str_replace('"','',$Opportunity->salesStageOption->description)))->count() == 0) {
+                if (SalesStages::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Opportunity->salesStageOption->description)))))->count() == 0) {
                     SalesStages::create([
                         'name' => str_replace("'","",str_replace('"','',$Opportunity->salesStageOption->description)),
                         'tenant_id' => 1,
@@ -85,46 +84,27 @@ class MigrateSales extends Command
                     ]);
                 }
             }
-            $currency = $Opportunity->currency ? (Currencies::where('code', str_replace("'","",str_replace('"','',$Opportunity->currency->currency_code)))->first()->id) : 1;
-            $country = $Opportunity->contact ? ($Opportunity->contact->person ? ($Opportunity->contact->person->addressDetail ? $Opportunity->contact->person->addressDetail->country_id : 1) : 1) : 1;
-            if (Locations::where('country_id', $country)->where('currency_id', $currency)->count() == 0) {
-                $Location = Locations::create([
-                    'name' => "-",
-                    'tax_rate' => 0.16,
-                    'tax_free' => 0,
-                    'description' => "-",
-                    'active' => 1,
-                    'tenant_id' => 1,
-                    'country_id' => $country,
-                    'currency_id' => $currency,
-                ]);
-            } else {
-                $Location = Locations::where('country_id', $country)->where('currency_id', $currency)->first();
-            }
             Opportunities::create([
                 'id' => $Opportunity->id,
                 'tenant_id' => 1,
-                'name' => str_replace("'","",str_replace('"','',$Opportunity->name)),
-                'probability' => str_replace("'","",str_replace('"','',$Opportunity->probability)),
+                'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Opportunity->name)))),
+                'probability' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Opportunity->probability)))),
                 'amount' => $Opportunity->amount,
                 'expected_close_date' => $Opportunity->expected_close_date,
-                'campaign' => $Opportunity->campaign ? str_replace("'","",str_replace('"','',$Opportunity->campaign->name)) : null,
+                'campaign' => $Opportunity->campaign ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Opportunity->campaign->name)))) : null,
                 'weighted_revenue' => $Opportunity->weighted_revenue,
                 'description' => str_replace("'","",str_replace('"','',$Opportunity->description)),
                 'contact_id' => $Opportunity->contact_id,
                 'organisation_id' => $Opportunity->organization_id,
-                'location_id' => $Location->id,
+                'location_id' => $Opportunity->Document ? ($Opportunity->Document->location_id) : null,
                 'assigned_user_id' => 1,
                 'opportunity_source_id' => $Opportunity->opportunitySourceOption ? OpportunitySources::where('name', str_replace("'","",str_replace('"','',$Opportunity->opportunitySourceOption->description)))->first()->id : OpportunitySources::where('name', "-")->first()->id,
                 'sales_stage_id' => $Opportunity->salesStageOption ? SalesStages::where('name', str_replace("'","",str_replace('"','',$Opportunity->salesStageOption->description)))->first()->id : SalesStages::where('name', "-")->first()->id,
                 'campaign_id' => $Opportunity->campaign ? $Opportunity->campaign->id : null,
-                'currency_id' => $Opportunity->currency ? (Currencies::where('code', str_replace("'","",str_replace('"','',$Opportunity->currency->currency_code)))->first()->id) : null,
+                'currency_id' => $Opportunity->currency ? (Currencies::where('code', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Opportunity->currency->currency_code)))))->first()->id) : null,
             ]);
             $progress->advance();
             unset($Opportunity);
-            unset($currency);
-            unset($country);
-            unset($Location);
         }
         $progress->finish();
         unset($Opportunities);
@@ -134,9 +114,9 @@ class MigrateSales extends Command
         $progress->start();
         foreach (Quote::get() as $Quote) {
             if ($Quote->quoteStageOption) {
-                if (QuoteStages::where('name', str_replace("'","",str_replace('"','',$Quote->quoteStageOption->description)))->count() == 0) {
+                if (QuoteStages::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Quote->quoteStageOption->description)))))->count() == 0) {
                     QuoteStages::create([
-                        'name' => str_replace("'","",str_replace('"','',$Quote->quoteStageOption->description)),
+                        'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Quote->quoteStageOption->description)))),
                         'tenant_id' => 1,
                     ]);
                 }
@@ -148,31 +128,16 @@ class MigrateSales extends Command
                     ]);
                 }
             }
-            $currency = $Quote->currency ? (Currencies::where('code', str_replace("'","",str_replace('"','',$Quote->currency->currency_code)))->first()->id) : 1;
-            $country = $Quote->contact ? ($Quote->contact->person ? ($Quote->contact->person->addressDetail ? $Quote->contact->person->addressDetail->country_id : 1) : 1) : 1;
-            if (Locations::where('country_id', $country)->where('currency_id', $currency)->count() == 0) {
-                $Location = Locations::create([
-                    'name' => "-",
-                    'tax_rate' => 0.16,
-                    'tax_free' => 0,
-                    'description' => "-",
-                    'active' => 1,
-                    'tenant_id' => 1,
-                    'country_id' => $country,
-                    'currency_id' => $currency,
-                ]);
-            } else {
-                $Location = Locations::where('country_id', $country)->where('currency_id', $currency)->first();
-            }
+            $currency = $Quote->currency ? (Currencies::where('code', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Quote->currency->currency_code)))))->first()->id) : 1;
             Quotes::create([
                 'id' => $Quote->id,
                 'tenant_id' => 1,
-                'location_id' => $Location->id,
-                'quote_stage_id' => $Quote->quoteStageOption ? QuoteStages::where('name', str_replace("'","",str_replace('"','',$Quote->quoteStageOption->description)))->first()->id : QuoteStages::where('name', "-")->first()->id,
+                'location_id' => $Quote->Document ? ($Quote->Document->location_id) : null,
+                'quote_stage_id' => $Quote->quoteStageOption ? QuoteStages::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Quote->quoteStageOption->description)))))->first()->id : QuoteStages::where('name', "-")->first()->id,
                 'assigned_user_id' => 1,
                 'currency_id' => $currency,
-                'number' => str_replace("'","",str_replace('"','',$Quote->number)),
-                'subject' => str_replace("'","",str_replace('"','',$Quote->subject)),
+                'number' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Quote->number)))),
+                'subject' => mb_convert_encoding(addslashes(preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','', $Quote->subject))))), 'UTF-8', 'UTF-8'),
                 'expiry_date' => $Quote->expiry_date,
                 'sales_order' => null,
                 'subtotal_amount' => $Quote->subtotal_amount,
@@ -187,8 +152,6 @@ class MigrateSales extends Command
             $progress->advance();
             unset($Quote);
             unset($currency);
-            unset($country);
-            unset($Location);
         }
         $progress->finish();
 
@@ -197,9 +160,9 @@ class MigrateSales extends Command
         $progress->start();
         foreach (SalesOrder::get() as $SalesOrder) {
             if ($SalesOrder->salesOrderStatusOption) {
-                if (SalesOrderStatuses::where('name', str_replace("'","",str_replace('"','',$SalesOrder->salesOrderStatusOption->description)))->count() == 0) {
+                if (SalesOrderStatuses::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SalesOrder->salesOrderStatusOption->description)))))->count() == 0) {
                     SalesOrderStatuses::create([
-                        'name' => str_replace("'","",str_replace('"','',$SalesOrder->salesOrderStatusOption->description)),
+                        'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SalesOrder->salesOrderStatusOption->description)))),
                         'tenant_id' => 1,
                     ]);
                 }
@@ -211,33 +174,18 @@ class MigrateSales extends Command
                     ]);
                 }
             }
-            $currency = $SalesOrder->currency ? (Currencies::where('code', str_replace("'","",str_replace('"','',$SalesOrder->currency->currency_code)))->first()->id) : 1;
-            $country = $SalesOrder->contact ? ($SalesOrder->contact->person ? ($SalesOrder->contact->person->addressDetail ? $SalesOrder->contact->person->addressDetail->country_id : 1) : 1) : 1;
-            if (Locations::where('country_id', $country)->where('currency_id', $currency)->count() == 0) {
-                $Location = Locations::create([
-                    'name' => "-",
-                    'tax_rate' => 0.16,
-                    'tax_free' => 0,
-                    'description' => "-",
-                    'active' => 1,
-                    'tenant_id' => 1,
-                    'country_id' => $country,
-                    'currency_id' => $currency,
-                ]);
-            } else {
-                $Location = Locations::where('country_id', $country)->where('currency_id', $currency)->first();
-            }
+            $currency = $SalesOrder->currency ? (Currencies::where('code', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SalesOrder->currency->currency_code)))))->first()->id) : 1;
             SalesOrders::create([
                 'id' => $SalesOrder->id,
                 'tenant_id' => 1,
-                'location_id' => $Location->id,
-                'quote_id' => $Location->quote_id,
-                'sales_order_status_id' => $SalesOrder->salesOrderStatusOption ? SalesOrderStatuses::where('name', str_replace("'","",str_replace('"','',$SalesOrder->salesOrderStatusOption->description)))->first()->id : SalesOrderStatuses::where('name', "-")->first()->id,
+                'location_id' => $SalesOrder->Document ? ($SalesOrder->Document->location_id) : null,
+                'quote_id' => $SalesOrder->quote_id,
+                'sales_order_status_id' => $SalesOrder->salesOrderStatusOption ? SalesOrderStatuses::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SalesOrder->salesOrderStatusOption->description)))))->first()->id : SalesOrderStatuses::where('name', "-")->first()->id,
                 'assigned_user_id' => 1,
                 'currency_id' => $currency,
                 'opportunity_id' => $SalesOrder->opportunity_id,
                 'organisation_id' => $SalesOrder->organization_id,
-                'subject' => str_replace("'","",str_replace('"','',$SalesOrder->subject)),
+                'subject' => mb_convert_encoding(addslashes(preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SalesOrder->subject))))), 'UTF-8', 'UTF-8'),
                 'due_date' => $SalesOrder->due_date,
                 'subtotal_amount' => $SalesOrder->subtotal_amount,
                 'sales_tax_percentage' => $SalesOrder->sales_tax_percentage,
@@ -249,8 +197,6 @@ class MigrateSales extends Command
             $progress->advance();
             unset($SalesOrder);
             unset($currency);
-            unset($country);
-            unset($Location);
         }
         $progress->finish();
 
@@ -259,9 +205,9 @@ class MigrateSales extends Command
         $progress->start();
         foreach (Invoice::get() as $Invoice) {
             if ($Invoice->invoiceStatusOption) {
-                if (SalesOrderInvoiceStatuses::where('name', str_replace("'","",str_replace('"','',$Invoice->invoiceStatusOption->description)))->count() == 0) {
+                if (SalesOrderInvoiceStatuses::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Invoice->invoiceStatusOption->description)))))->count() == 0) {
                     SalesOrderInvoiceStatuses::create([
-                        'name' => str_replace("'","",str_replace('"','',$Invoice->invoiceStatusOption->description)),
+                        'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Invoice->invoiceStatusOption->description)))),
                         'tenant_id' => 1,
                     ]);
                 }
@@ -273,47 +219,30 @@ class MigrateSales extends Command
                     ]);
                 }
             }
-            $currency = $Invoice->currency ? (Currencies::where('code', str_replace("'","",str_replace('"','',$Invoice->currency->currency_code)))->first()->id) : 1;
-            $country = $Invoice->contact ? ($Invoice->contact->person ? ($Invoice->contact->person->addressDetail ? $Invoice->contact->person->addressDetail->country_id : 1) : 1) : 1;
-            if (Locations::where('country_id', $country)->where('currency_id', $currency)->count() == 0) {
-                $Location = Locations::create([
-                    'name' => "-",
-                    'tax_rate' => 0.16,
-                    'tax_free' => 0,
-                    'description' => "-",
-                    'active' => 1,
-                    'tenant_id' => 1,
-                    'country_id' => $country,
-                    'currency_id' => $currency,
-                ]);
-            } else {
-                $Location = Locations::where('country_id', $country)->where('currency_id', $currency)->first();
-            }
+            $currency = $Invoice->currency ? (Currencies::where('code', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Invoice->currency->currency_code)))))->first()->id) : 1;
             SalesOrderInvoices::create([
                 'id' => $Invoice->id,
                 'sales_order_id' => $Invoice->sales_order_id,
-                'location_id' => $Location->id,
+                'location_id' => $Invoice->Document ? ($Invoice->Document->location_id) : null,
                 'organisation_id' => $Invoice->organization_id,
                 'sales_order_invoice_status_id' => $Invoice->invoiceStatusOption ? SalesOrderInvoiceStatuses::where('name', str_replace("'","",str_replace('"','',$Invoice->invoiceStatusOption->description)))->first()->id : SalesOrderInvoiceStatuses::where('name', "-")->first()->id,
                 'assigned_user_id' => 1,
                 'currency_id' => $currency,
                 'date' => $Invoice->invoice_date,
-                'subject' => str_replace("'","",str_replace('"','',$Invoice->subject)),
+                'subject' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Invoice->subject)))),
                 'due_date' => $Invoice->due_date,
                 'subtotal_amount' => $Invoice->subtotal_amount,
                 'sales_tax_percentage' => $Invoice->sales_tax_percentage,
                 'total_amount' => $Invoice->total_amount,
-                'description' => str_replace("'","",str_replace('"','',$Invoice->description)),
+                'description' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Invoice->description)))),
                 'contact_id' => $Invoice->contact_id,
-                'number' => str_replace("'","",str_replace('"','',$Invoice->number)),
+                'number' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$Invoice->number)))),
                 'tenant_id' => 1,
                 'tax_amount' => $Invoice->media_tax_percentage,
             ]);
             $progress->advance();
             unset($Invoice);
             unset($currency);
-            unset($country);
-            unset($Location);
         }
         $progress->finish();
 

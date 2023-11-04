@@ -19,5 +19,5 @@ class EStoreUser extends Model
 
 	public function country(){return $this->belongsTo(Country::class, 'country_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 }

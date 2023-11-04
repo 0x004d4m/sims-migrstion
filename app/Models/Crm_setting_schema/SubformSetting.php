@@ -19,7 +19,7 @@ class SubformSetting extends Model
 
 	public function form(){return $this->belongsTo(FormSetting::class, 'form_id', 'id');}
 
-	public function Settings(){return $this->hasMany(Setting::class, 'id', 'id');}
+	public function Setting(){return $this->hasOne(Setting::class, 'id', 'id');}
 
 	public function parentSubform(){return $this->belongsTo(SubformSetting::class, 'parent_subform_id', 'id');}
 }

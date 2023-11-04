@@ -23,7 +23,7 @@ class ExpensesPaymentVoucher extends Model
 
 	public function paymentMethod(){return $this->belongsTo(PaymentMethod::class, 'payment_method_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
 	public function expensesOrganization(){return $this->belongsTo(ExpensesContact::class, 'expenses_organization_id', 'id');}
 

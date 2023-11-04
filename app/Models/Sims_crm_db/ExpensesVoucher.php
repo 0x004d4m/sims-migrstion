@@ -17,11 +17,11 @@ class ExpensesVoucher extends Model
 	protected $fillable = ['is_cash_expenses','description','invoice_date','invoice_number','number','sales_tax_percentage','subject','subtotal_amount','total_amount','verified','id','category','currency_id','expenses_contact_id','supplier_invoice_status_option_id','expenses_organization_id'];
 
 
-	public function ListOptions(){return $this->hasMany(ListOption::class, 'category', 'id');}
+	public function ListOption(){return $this->hasOne(ListOption::class, 'category', 'id');}
 
 	public function expensesContact(){return $this->belongsTo(ExpensesContact::class, 'expenses_contact_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
 	public function expensesOrganization(){return $this->belongsTo(ExpensesContact::class, 'expenses_organization_id', 'id');}
 

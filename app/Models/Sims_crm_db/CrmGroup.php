@@ -19,5 +19,5 @@ class CrmGroup extends Model
 
 	public function location(){return $this->belongsTo(Location::class, 'location_id', 'id');}
 
-	public function UserDocuments(){return $this->hasMany(UserDocument::class, 'id', 'id');}
+	public function UserDocument(){return $this->hasOne(UserDocument::class, 'id', 'id');}
 }

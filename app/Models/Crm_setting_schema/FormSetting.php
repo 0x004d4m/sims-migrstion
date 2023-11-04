@@ -21,5 +21,5 @@ class FormSetting extends Model
 
 	public function defaultView(){return $this->belongsTo(ViewSetting::class, 'default_view_id', 'id');}
 
-	public function Settings(){return $this->hasMany(Setting::class, 'id', 'id');}
+	public function Setting(){return $this->hasOne(Setting::class, 'id', 'id');}
 }

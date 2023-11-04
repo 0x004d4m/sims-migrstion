@@ -17,5 +17,5 @@ class Todo extends Model
 	protected $fillable = ['is_completed','description','subject','time','id'];
 
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 }

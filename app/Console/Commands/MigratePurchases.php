@@ -9,7 +9,6 @@ use App\Models\Sims_crm_db\{
 };
 use App\Models\Sims_new\{
     Currencies,
-    Locations,
     PurchaseOrderInvoices,
     PurchaseOrders,
     PurchaseOrderStatuses,
@@ -49,9 +48,9 @@ class MigratePurchases extends Command
         $progress->start();
         foreach (RequestForQuotation::get() as $RequestForQuotation) {
             if ($RequestForQuotation->requestForQuotationStageOption) {
-                if (RequestForQuotationStages::where('name', str_replace("'","",str_replace('"','',$RequestForQuotation->requestForQuotationStageOption->description)))->count() == 0) {
+                if (RequestForQuotationStages::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$RequestForQuotation->requestForQuotationStageOption->description)))))->count() == 0) {
                     RequestForQuotationStages::create([
-                        'name' => str_replace("'","",str_replace('"','',$RequestForQuotation->requestForQuotationStageOption->description)),
+                        'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$RequestForQuotation->requestForQuotationStageOption->description)))),
                         'tenant_id' => 1,
                     ]);
                 }
@@ -63,40 +62,21 @@ class MigratePurchases extends Command
                     ]);
                 }
             }
-            $currency = $RequestForQuotation->supplierOrganization ? ($RequestForQuotation->supplierOrganization->currency ? (Currencies::where('code', str_replace("'","",str_replace('"','',$RequestForQuotation->supplierOrganization->currency->currency_code)))->first()->id) : 1) : 1;
-            $country = $RequestForQuotation->supplierOrganization ? ($RequestForQuotation->supplierOrganization->addressDetail ? $RequestForQuotation->supplierOrganization->addressDetail->country_id : 1) : 1;
-            if (Locations::where('country_id', $country)->where('currency_id', $currency)->count() == 0) {
-                $Location = Locations::create([
-                    'name' => "-",
-                    'tax_rate' => 0.16,
-                    'tax_free' => 0,
-                    'description' => "-",
-                    'active' => 1,
-                    'tenant_id' => 1,
-                    'country_id' => $country,
-                    'currency_id' => $currency,
-                ]);
-            } else {
-                $Location = Locations::where('country_id', $country)->where('currency_id', $currency)->first();
-            }
             RequestForQuotations::create([
-                'id' => str_replace("'","",str_replace('"','',$RequestForQuotation->id)),
-                'location_id' => $Location->id,
+                'id' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$RequestForQuotation->id)))),
+                'location_id' => $RequestForQuotation->Document ? ($RequestForQuotation->Document->location_id) : null,
                 'assigned_user_id' => 1,
                 'supplier_contact_id' => $RequestForQuotation->supplier_contact_id,
                 'supplier_organisation_id' => $RequestForQuotation->supplier_organization_id,
-                'request_for_quotation_stage_id' => $RequestForQuotation->requestForQuotationStageOption ? RequestForQuotationStages::where('name', str_replace("'","",str_replace('"','',$RequestForQuotation->requestForQuotationStageOption->description)))->first()->id : RequestForQuotationStages::where('name', "-")->first()->id,
-                'title' => str_replace("'","",str_replace('"','',$RequestForQuotation->title)),
-                'number' => str_replace("'","",str_replace('"','',$RequestForQuotation->number)),
+                'request_for_quotation_stage_id' => $RequestForQuotation->requestForQuotationStageOption ? RequestForQuotationStages::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$RequestForQuotation->requestForQuotationStageOption->description)))))->first()->id : RequestForQuotationStages::where('name', "-")->first()->id,
+                'title' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$RequestForQuotation->title)))),
+                'number' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$RequestForQuotation->number)))),
                 'request_date' => $RequestForQuotation->request_date,
                 'description' => str_replace("'","",str_replace('"','',$RequestForQuotation->description)),
                 'tenant_id' => 1,
             ]);
             $progress->advance();
             unset($RequestForQuotation);
-            unset($currency);
-            unset($country);
-            unset($Location);
         }
         $progress->finish();
 
@@ -105,9 +85,9 @@ class MigratePurchases extends Command
         $progress->start();
         foreach (PurchaseOrder::get() as $PurchaseOrder) {
             if ($PurchaseOrder->purchaseOrderStatusOption) {
-                if (PurchaseOrderStatuses::where('name', str_replace("'","",str_replace('"','',$PurchaseOrder->purchaseOrderStatusOption->description)))->count() == 0) {
+                if (PurchaseOrderStatuses::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$PurchaseOrder->purchaseOrderStatusOption->description)))))->count() == 0) {
                     PurchaseOrderStatuses::create([
-                        'name' => str_replace("'","",str_replace('"','',$PurchaseOrder->purchaseOrderStatusOption->description)),
+                        'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$PurchaseOrder->purchaseOrderStatusOption->description)))),
                         'tenant_id' => 1,
                     ]);
                 }
@@ -119,45 +99,28 @@ class MigratePurchases extends Command
                     ]);
                 }
             }
-            $currency = $PurchaseOrder->currency ? (Currencies::where('code', str_replace("'","",str_replace('"','',$PurchaseOrder->currency->currency_code)))->first()->id) : 1;
-            $country = $PurchaseOrder->contact ? ($PurchaseOrder->contact->person ? ($PurchaseOrder->contact->person->addressDetail ? $PurchaseOrder->contact->person->addressDetail->country_id : 1) : 1) : 1;
-            if (Locations::where('country_id', $country)->where('currency_id', $currency)->count() == 0) {
-                $Location = Locations::create([
-                    'name' => "-",
-                    'tax_rate' => 0.16,
-                    'tax_free' => 0,
-                    'description' => "-",
-                    'active' => 1,
-                    'tenant_id' => 1,
-                    'country_id' => $country,
-                    'currency_id' => $currency,
-                ]);
-            } else {
-                $Location = Locations::where('country_id', $country)->where('currency_id', $currency)->first();
-            }
+            $currency = $PurchaseOrder->currency ? (Currencies::where('code', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$PurchaseOrder->currency->currency_code)))))->first()->id) : 1;
             PurchaseOrders::create([
-                'id' => str_replace("'","",str_replace('"','',$PurchaseOrder->id)),
-                'location_id' => $Location->id,
-                'purchase_order_status_id' => $PurchaseOrder->purchaseOrderStatusOption ? PurchaseOrderStatuses::where('name', str_replace("'","",str_replace('"','',$PurchaseOrder->purchaseOrderStatusOption->description)))->first()->id : PurchaseOrderStatuses::where('name', "-")->first()->id,
+                'id' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$PurchaseOrder->id)))),
+                'location_id' => $PurchaseOrder->Document ? ($PurchaseOrder->Document->location_id) : null,
+                'purchase_order_status_id' => $PurchaseOrder->purchaseOrderStatusOption ? PurchaseOrderStatuses::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$PurchaseOrder->purchaseOrderStatusOption->description)))))->first()->id : PurchaseOrderStatuses::where('name', "-")->first()->id,
                 'assigned_user_id' => 1,
                 'currency_id' => $currency,
                 'supplier_contact_id' => $PurchaseOrder->supplier_contact_id,
                 'supplier_organisation_id' => $PurchaseOrder->supplier_organization_id,
-                'subject' => str_replace("'","",str_replace('"','',$PurchaseOrder->subject)),
-                'number' => str_replace("'","",str_replace('"','',$PurchaseOrder->number)),
+                'subject' => mb_convert_encoding(addslashes(preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$PurchaseOrder->subject))))), 'UTF-8', 'UTF-8'),
+                'number' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$PurchaseOrder->number)))),
                 'due_date' => $PurchaseOrder->due_date,
                 'subtotal_amount' => $PurchaseOrder->subtotal_amount,
                 'sales_tax_percentage' => $PurchaseOrder->sales_tax_percentage,
                 'total_amount' => $PurchaseOrder->total_amount,
-                'description' => str_replace("'","",str_replace('"','',$PurchaseOrder->description)),
+                'description' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$PurchaseOrder->description)))),
                 'tenant_id' => 1,
                 'request_for_quotation_id' => $PurchaseOrder->request_for_quotation_id,
             ]);
             $progress->advance();
             unset($PurchaseOrder);
             unset($currency);
-            unset($country);
-            unset($Location);
         }
         $progress->finish();
 
@@ -166,9 +129,9 @@ class MigratePurchases extends Command
         $progress->start();
         foreach (SupplierInvoice::get() as $SupplierInvoice) {
             if ($SupplierInvoice->purchaseOrderStatusOption) {
-                if (PurchaseOrderStatuses::where('name', str_replace("'","",str_replace('"','',$SupplierInvoice->purchaseOrderStatusOption->description)))->count() == 0) {
+                if (PurchaseOrderStatuses::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SupplierInvoice->purchaseOrderStatusOption->description)))))->count() == 0) {
                     PurchaseOrderStatuses::create([
-                        'name' => str_replace("'","",str_replace('"','',$SupplierInvoice->purchaseOrderStatusOption->description)),
+                        'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SupplierInvoice->purchaseOrderStatusOption->description)))),
                         'tenant_id' => 1,
                     ]);
                 }
@@ -180,46 +143,29 @@ class MigratePurchases extends Command
                     ]);
                 }
             }
-            $currency = $SupplierInvoice->currency ? (Currencies::where('code', str_replace("'","",str_replace('"','',$SupplierInvoice->currency->currency_code)))->first()->id) : 1;
-            $country = $SupplierInvoice->supplierContact ? ($SupplierInvoice->supplierContact->addressDetail ? $SupplierInvoice->supplierContact->addressDetail->country_id : 1) : 1;
-            if (Locations::where('country_id', $country)->where('currency_id', $currency)->count() == 0) {
-                $Location = Locations::create([
-                    'name' => "-",
-                    'tax_rate' => 0.16,
-                    'tax_free' => 0,
-                    'description' => "-",
-                    'active' => 1,
-                    'tenant_id' => 1,
-                    'country_id' => $country,
-                    'currency_id' => $currency,
-                ]);
-            } else {
-                $Location = Locations::where('country_id', $country)->where('currency_id', $currency)->first();
-            }
+            $currency = $SupplierInvoice->currency ? (Currencies::where('code', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SupplierInvoice->currency->currency_code)))))->first()->id) : 1;
             PurchaseOrderInvoices::create([
                 'id' => $SupplierInvoice->id,
                 'purchase_order_id' => $SupplierInvoice->purchase_order_id,
-                'location_id' => $Location->id,
+                'location_id' => $SupplierInvoice->Document ? ($SupplierInvoice->Document->location_id) : null,
                 'supplier_organisation_id' => $SupplierInvoice->supplier_organization_id,
                 'supplier_contact_id' => $SupplierInvoice->supplier_contact_id,
-                'purchase_order_invoice_status_id' => $SupplierInvoice->purchaseOrderStatusOption ? PurchaseOrderStatuses::where('name', str_replace("'","",str_replace('"','',$SupplierInvoice->purchaseOrderStatusOption->description)))->first()->id : PurchaseOrderStatuses::where('name', "-")->first()->id,
+                'purchase_order_invoice_status_id' => $SupplierInvoice->purchaseOrderStatusOption ? PurchaseOrderStatuses::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SupplierInvoice->purchaseOrderStatusOption->description)))))->first()->id : PurchaseOrderStatuses::where('name', "-")->first()->id,
                 'assigned_user_id' => 1,
                 'currency_id' => $currency,
                 'date' => $SupplierInvoice->invoice_date,
-                'subject' => str_replace("'","",str_replace('"','',$SupplierInvoice->subject)),
+                'subject' => mb_convert_encoding(addslashes(preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SupplierInvoice->subject))))), 'UTF-8', 'UTF-8'),
                 'due_date' => $SupplierInvoice->due_date,
                 'subtotal_amount' => $SupplierInvoice->subtotal_amount,
                 'sales_tax_percentage' => $SupplierInvoice->sales_tax_percentage,
                 'total_amount' => $SupplierInvoice->total_amount,
-                'description' => str_replace("'","",str_replace('"','',$SupplierInvoice->description)),
-                'number' => str_replace("'","",str_replace('"','',$SupplierInvoice->invoice_number)),
+                'description' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SupplierInvoice->description)))),
+                'number' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SupplierInvoice->invoice_number)))),
                 'tenant_id' => 1,
             ]);
             $progress->advance();
             unset($SupplierInvoice);
             unset($currency);
-            unset($country);
-            unset($Location);
         }
         $progress->finish();
 

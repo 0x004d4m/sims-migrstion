@@ -25,5 +25,5 @@ class FieldSetting extends Model
 
 	public function lookupForm(){return $this->belongsTo(FormSetting::class, 'lookup_form_id', 'id');}
 
-	public function Settings(){return $this->hasMany(Setting::class, 'id', 'id');}
+	public function Setting(){return $this->hasOne(Setting::class, 'id', 'id');}
 }

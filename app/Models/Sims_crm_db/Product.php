@@ -21,7 +21,7 @@ class Product extends Model
 
 	public function supplierOrganization(){return $this->belongsTo(SupplierOrganization::class, 'supplier_organization_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
 	public function currency(){return $this->belongsTo(Currency::class, 'currency_id', 'id');}
 

@@ -23,7 +23,7 @@ class Organization extends Model
 
 	public function billingAddressDetail(){return $this->belongsTo(AddressDetails::class, 'billing_address_details_id', 'id');}
 
-	public function Documents(){return $this->hasMany(Document::class, 'id', 'id');}
+	public function Document(){return $this->hasOne(Document::class, 'id', 'id');}
 
 	public function currency(){return $this->belongsTo(Currency::class, 'currency_id', 'id');}
 
