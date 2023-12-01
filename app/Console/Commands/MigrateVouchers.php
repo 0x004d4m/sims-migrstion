@@ -48,7 +48,7 @@ class MigrateVouchers extends Command
                 'location_id' => $PaymentVoucherCheckPayment->paymentVoucher ? ($PaymentVoucherCheckPayment->paymentVoucher->Document ? ($PaymentVoucherCheckPayment->paymentVoucher->Document->location_id) : null) : null,
                 'sales_order_invoices_id' => null,
                 'purchase_order_invoices_id' => $PaymentVoucherCheckPayment->paymentVoucher ? $PaymentVoucherCheckPayment->paymentVoucher->supplier_invoice_id : null,
-                'assigned_user_id' => 1,
+                'assigned_user_id' => $PaymentVoucherCheckPayment->paymentVoucher ? ($PaymentVoucherCheckPayment->paymentVoucher->Document ? ($PaymentVoucherCheckPayment->paymentVoucher->Document->user_id??1) : 1) : 1,
                 'organisation_id' => null,
                 'contact_id' => null,
                 'supplier_organisation_id' => $PaymentVoucherCheckPayment->paymentVoucher ? $PaymentVoucherCheckPayment->paymentVoucher->supplier_organization_id : null,
@@ -62,6 +62,9 @@ class MigrateVouchers extends Command
                 'cash_amount' => $PaymentVoucherCheckPayment->paymentVoucher ? $PaymentVoucherCheckPayment->paymentVoucher->cash_amount : null,
                 'total_amount' => $PaymentVoucherCheckPayment->paymentVoucher ? $PaymentVoucherCheckPayment->paymentVoucher->total_amount : null,
                 'tenant_id' => 1,
+                'u_id' => (Vouchers::count() + 1),
+                'created_at' => $PaymentVoucherCheckPayment->paymentVoucher ? ($PaymentVoucherCheckPayment->paymentVoucher->Document ? ($PaymentVoucherCheckPayment->paymentVoucher->Document->create_time) : null) : null,
+                'updated_at' => $PaymentVoucherCheckPayment->paymentVoucher ? ($PaymentVoucherCheckPayment->paymentVoucher->Document ? ($PaymentVoucherCheckPayment->paymentVoucher->Document->last_edit_time) : null) : null,
             ]);
             $progress->advance();
             unset($PaymentVoucherCheckPayment);
@@ -78,7 +81,7 @@ class MigrateVouchers extends Command
                 'location_id' => $ReceiptVoucherCheckPayment->receiptVoucher ? ($ReceiptVoucherCheckPayment->receiptVoucher->Document ? ($ReceiptVoucherCheckPayment->receiptVoucher->Document->location_id) : null) : null,
                 'sales_order_invoices_id' => $ReceiptVoucherCheckPayment->receiptVoucher? $ReceiptVoucherCheckPayment->receiptVoucher->invoice_id :null,
                 'purchase_order_invoices_id' => null,
-                'assigned_user_id' => 1,
+                'assigned_user_id' => $ReceiptVoucherCheckPayment->receiptVoucher ? ($ReceiptVoucherCheckPayment->receiptVoucher->Document ? ($ReceiptVoucherCheckPayment->receiptVoucher->Document->user_id??1) : 1) : 1,
                 'organisation_id' => $ReceiptVoucherCheckPayment->receiptVoucher ? $ReceiptVoucherCheckPayment->receiptVoucher->organization_id : null,
                 'contact_id' => $ReceiptVoucherCheckPayment->receiptVoucher ? $ReceiptVoucherCheckPayment->receiptVoucher->contact_id : null,
                 'supplier_organisation_id' => null,
@@ -92,6 +95,9 @@ class MigrateVouchers extends Command
                 'cash_amount' => $ReceiptVoucherCheckPayment->receiptVoucher ? $ReceiptVoucherCheckPayment->receiptVoucher->cash_amount : null,
                 'total_amount' => $ReceiptVoucherCheckPayment->receiptVoucher ? $ReceiptVoucherCheckPayment->receiptVoucher->total_amount : null,
                 'tenant_id' => 1,
+                'u_id' => (Vouchers::count() + 1),
+                'created_at' => $ReceiptVoucherCheckPayment->receiptVoucher ? ($ReceiptVoucherCheckPayment->receiptVoucher->Document ? ($ReceiptVoucherCheckPayment->receiptVoucher->Document->create_time) : null) : null,
+                'updated_at' => $ReceiptVoucherCheckPayment->receiptVoucher ? ($ReceiptVoucherCheckPayment->receiptVoucher->Document ? ($ReceiptVoucherCheckPayment->receiptVoucher->Document->last_edit_time) : null) : null,
             ]);
             $progress->advance();
             unset($ReceiptVoucherCheckPayment);

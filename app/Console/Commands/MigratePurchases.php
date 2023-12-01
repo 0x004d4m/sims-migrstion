@@ -52,6 +52,7 @@ class MigratePurchases extends Command
                     RequestForQuotationStages::create([
                         'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$RequestForQuotation->requestForQuotationStageOption->description)))),
                         'tenant_id' => 1,
+                        'u_id' => (RequestForQuotationStages::count() + 1),
                     ]);
                 }
             } else {
@@ -59,13 +60,14 @@ class MigratePurchases extends Command
                     RequestForQuotationStages::create([
                         'name' => "-",
                         'tenant_id' => 1,
+                        'u_id' => (RequestForQuotationStages::count() + 1),
                     ]);
                 }
             }
             RequestForQuotations::create([
                 'id' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$RequestForQuotation->id)))),
                 'location_id' => $RequestForQuotation->Document ? ($RequestForQuotation->Document->location_id) : null,
-                'assigned_user_id' => 1,
+                'assigned_user_id' => $RequestForQuotation->Document ? $RequestForQuotation->Document->user_id??1 : 1,
                 'supplier_contact_id' => $RequestForQuotation->supplier_contact_id,
                 'supplier_organisation_id' => $RequestForQuotation->supplier_organization_id,
                 'request_for_quotation_stage_id' => $RequestForQuotation->requestForQuotationStageOption ? RequestForQuotationStages::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$RequestForQuotation->requestForQuotationStageOption->description)))))->first()->id : RequestForQuotationStages::where('name', "-")->first()->id,
@@ -74,6 +76,9 @@ class MigratePurchases extends Command
                 'request_date' => $RequestForQuotation->request_date,
                 'description' => str_replace("'","",str_replace('"','',$RequestForQuotation->description)),
                 'tenant_id' => 1,
+                'u_id' => (RequestForQuotations::count() + 1),
+                'created_at' => ($RequestForQuotation->Document ? ($RequestForQuotation->Document->create_time) : null),
+                'updated_at' => ($RequestForQuotation->Document ? ($RequestForQuotation->Document->last_edit_time) : null),
             ]);
             $progress->advance();
             unset($RequestForQuotation);
@@ -89,6 +94,7 @@ class MigratePurchases extends Command
                     PurchaseOrderStatuses::create([
                         'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$PurchaseOrder->purchaseOrderStatusOption->description)))),
                         'tenant_id' => 1,
+                        'u_id' => (PurchaseOrderStatuses::count() + 1),
                     ]);
                 }
             } else {
@@ -96,6 +102,7 @@ class MigratePurchases extends Command
                     PurchaseOrderStatuses::create([
                         'name' => "-",
                         'tenant_id' => 1,
+                        'u_id' => (PurchaseOrderStatuses::count() + 1),
                     ]);
                 }
             }
@@ -104,7 +111,7 @@ class MigratePurchases extends Command
                 'id' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$PurchaseOrder->id)))),
                 'location_id' => $PurchaseOrder->Document ? ($PurchaseOrder->Document->location_id) : null,
                 'purchase_order_status_id' => $PurchaseOrder->purchaseOrderStatusOption ? PurchaseOrderStatuses::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$PurchaseOrder->purchaseOrderStatusOption->description)))))->first()->id : PurchaseOrderStatuses::where('name', "-")->first()->id,
-                'assigned_user_id' => 1,
+                'assigned_user_id' => $PurchaseOrder->Document ? $PurchaseOrder->Document->user_id??1 : 1,
                 'currency_id' => $currency,
                 'supplier_contact_id' => $PurchaseOrder->supplier_contact_id,
                 'supplier_organisation_id' => $PurchaseOrder->supplier_organization_id,
@@ -116,7 +123,10 @@ class MigratePurchases extends Command
                 'total_amount' => $PurchaseOrder->total_amount,
                 'description' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$PurchaseOrder->description)))),
                 'tenant_id' => 1,
+                'u_id' => (PurchaseOrders::count() + 1),
                 'request_for_quotation_id' => $PurchaseOrder->request_for_quotation_id,
+                'created_at' => ($PurchaseOrder->Document ? ($PurchaseOrder->Document->create_time) : null),
+                'updated_at' => ($PurchaseOrder->Document ? ($PurchaseOrder->Document->last_edit_time) : null),
             ]);
             $progress->advance();
             unset($PurchaseOrder);
@@ -133,6 +143,7 @@ class MigratePurchases extends Command
                     PurchaseOrderStatuses::create([
                         'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SupplierInvoice->purchaseOrderStatusOption->description)))),
                         'tenant_id' => 1,
+                        'u_id' => (PurchaseOrderStatuses::count() + 1),
                     ]);
                 }
             } else {
@@ -140,6 +151,7 @@ class MigratePurchases extends Command
                     PurchaseOrderStatuses::create([
                         'name' => "-",
                         'tenant_id' => 1,
+                        'u_id' => (PurchaseOrderStatuses::count() + 1),
                     ]);
                 }
             }
@@ -151,7 +163,7 @@ class MigratePurchases extends Command
                 'supplier_organisation_id' => $SupplierInvoice->supplier_organization_id,
                 'supplier_contact_id' => $SupplierInvoice->supplier_contact_id,
                 'purchase_order_invoice_status_id' => $SupplierInvoice->purchaseOrderStatusOption ? PurchaseOrderStatuses::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SupplierInvoice->purchaseOrderStatusOption->description)))))->first()->id : PurchaseOrderStatuses::where('name', "-")->first()->id,
-                'assigned_user_id' => 1,
+                'assigned_user_id' => $SupplierInvoice->Document ? $SupplierInvoice->Document->user_id??1 : 1,
                 'currency_id' => $currency,
                 'date' => $SupplierInvoice->invoice_date,
                 'subject' => mb_convert_encoding(addslashes(preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SupplierInvoice->subject))))), 'UTF-8', 'UTF-8'),
@@ -162,6 +174,9 @@ class MigratePurchases extends Command
                 'description' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SupplierInvoice->description)))),
                 'number' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'","",str_replace('"','',$SupplierInvoice->invoice_number)))),
                 'tenant_id' => 1,
+                'u_id' => (PurchaseOrderInvoices::count() + 1),
+                'created_at' => ($SupplierInvoice->Document ? ($SupplierInvoice->Document->create_time) : null),
+                'updated_at' => ($SupplierInvoice->Document ? ($SupplierInvoice->Document->last_edit_time) : null),
             ]);
             $progress->advance();
             unset($SupplierInvoice);

@@ -60,12 +60,15 @@ class MigrateMeetings extends Command
                 'location' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Meeting->location)))),
                 'description' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Meeting->description)))),
                 'tenant_id' => 1,
-                'assigned_user_id' => 1,
+                'assigned_user_id' => $Meeting->Document ? $Meeting->Document->user_id??1 : 1,
                 'location_id' => $Meeting->Document ? ($Meeting->Document->location_id) : null,
                 'related_document' => $Meeting->document ? (Document::where('id', $Meeting->document->id)->first() ? (preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', Document::where('id', $Meeting->document->id)->first()->file_name))))) : null) : null,
                 'status' => "Held Meeting",
                 'meeting_start_date' => $Meeting->start_time,
                 'meeting_end_date' => $Meeting->end_time,
+                'u_id' => (Meetings::count() + 1),
+                'created_at' => ($Meeting->document ? ($Meeting->document->create_time) : null),
+                'updated_at' => ($Meeting->document ? ($Meeting->document->last_edit_time) : null),
             ]);
             if (MeetingLead::where('meeting_id', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Meeting->id)))))->count() > 0) {
                 foreach (MeetingLead::where('meeting_id', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Meeting->id)))))->get() as $MeetingLead) {
@@ -73,6 +76,8 @@ class MigrateMeetings extends Command
                         'invited_type' => meetings_invited_models_invited_type("Leads"),
                         'invited_id' => $MeetingLead->lead_id,
                         'meeting_id' => $Meeting->id,
+                        'created_at' => $Meeting->created_at,
+                        'updated_at' => $Meeting->updated_at,
                     ]);
                 }
             }
@@ -82,6 +87,8 @@ class MigrateMeetings extends Command
                         'invited_user_type' => meetings_invited_users_invited_user_type("Users"),
                         'invited_user_id' => $MeetingUser->user_id,
                         'meeting_id' => $Meeting->id,
+                        'created_at' => $Meeting->created_at,
+                        'updated_at' => $Meeting->updated_at,
                     ]);
                 }
             }
@@ -91,6 +98,8 @@ class MigrateMeetings extends Command
                         'invited_type' => meetings_invited_models_invited_type("Contacts"),
                         'invited_id' => $MeetingContact->contact_id,
                         'meeting_id' => $Meeting->id,
+                        'created_at' => $Meeting->created_at,
+                        'updated_at' => $Meeting->updated_at,
                     ]);
                 }
             }
@@ -100,6 +109,8 @@ class MigrateMeetings extends Command
                         'invited_type' => meetings_invited_models_invited_type("SupplierContacts"),
                         'invited_id' => $MeetingSupplierContact->supplier_contact_id,
                         'meeting_id' => $Meeting->id,
+                        'created_at' => $Meeting->created_at,
+                        'updated_at' => $Meeting->updated_at,
                     ]);
                 }
             }

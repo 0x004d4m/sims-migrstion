@@ -76,6 +76,7 @@ class MigrateUsers extends Command
                 'id' => $JobTitle->id,
                 'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $JobTitle->name)))),
                 'tenant_id' => 1,
+                'u_id' => (JobTitles::count() + 1),
             ]);
             $progress->advance();
             unset($JobTitle);
@@ -147,6 +148,8 @@ class MigrateUsers extends Command
                 'third_name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $User->third_name)))),
                 'username' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $User->userAuthenticationDetail->username)))),
                 'tenant_id' => 1,
+                'active' => $User->UserDocument ? ($User->UserDocument->disabled == 0 ? 2 : 1) : 0,
+                'u_id' => (Users::count()+1),
             ]);
             $progress->advance();
             unset($User);
@@ -187,6 +190,7 @@ class MigrateUsers extends Command
                     'description' => str_replace("'", "", str_replace('"', '', $UserLocation->location->description)),
                     'active' => 1,
                     'tenant_id' => 1,
+                    'u_id' => (Locations::count() + 1),
                     'country_id' => $UserLocation->location->country ? (Countries::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $UserLocation->location->country->name)))))->first()->id) :  Countries::where('name', "-")->first()->id,
                     'currency_id' => $UserLocation->location->currency ? (Currencies::where('code', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $UserLocation->location->currency->currency_code)))))->first()->id) : null,
                 ]);
@@ -213,6 +217,7 @@ class MigrateUsers extends Command
         $progress->start();
         foreach (CrmGroup::get() as $CrmGroup) {
             Groups::create([
+                'u_id' => (Groups::count() + 1),
                 'id' => $CrmGroup->id,
                 'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $CrmGroup->name)))),
                 'tenant_id' => 1,
@@ -233,6 +238,7 @@ class MigrateUsers extends Command
                     Industries::create([
                         'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Organization->industryOption->description)))),
                         'tenant_id' => 1,
+                        'u_id' => (Industries::count() + 1),
                     ]);
                 }
             } else {
@@ -240,6 +246,7 @@ class MigrateUsers extends Command
                     Industries::create([
                         'name' => "-",
                         'tenant_id' => 1,
+                        'u_id' => (Industries::count() + 1),
                     ]);
                 }
             }
@@ -259,8 +266,8 @@ class MigrateUsers extends Command
                 'registration_number' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Organization->registration_number)))),
                 'tax_number' => $Organization->tax_number,
                 'tax_rate' => $Organization->is_tax_free ? 0 : null,
-                'creator_id' => null,
-                'assigned_user_id' => 1,
+                'creator_id' => $Organization->Document ? $Organization->Document->creator_id ?? 1 : 1,
+                'assigned_user_id' => $Organization->Document ? $Organization->Document->user_id ?? 1 : 1,
                 'tenant_id' => 1,
                 'active' => 1,
                 'starting_balance' => $Organization->starting_balance,
@@ -269,6 +276,10 @@ class MigrateUsers extends Command
                 'location_id' => $Organization->Document ? ($Organization->Document->location_id) : null,
                 'u_id' => null,
                 'account_number' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Organization->account_number)))),
+                'second_primary_mobile' => $Organization->reachDetail ? ($Organization->reachDetail ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Organization->reachDetail->second_mobile)))) : null) : null,
+                'created_at' => $Organization->Document ? $Organization->Document->create_time ?? 1 : 1,
+                'updated_at' => $Organization->Document ? $Organization->Document->last_edit_time ?? 1 : 1,
+                'u_id' => (Organisations::count() + 1),
             ]);
             if ($Organization->billingAddressDetail || $Organization->shippingAddressDetail) {
                 OrganisationAddresses::create([
@@ -285,6 +296,8 @@ class MigrateUsers extends Command
                     'shipping_city' => $Organization->shippingAddressDetail ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Organization->shippingAddressDetail->city)))) : null,
                     'shipping_p_o_box' => $Organization->shippingAddressDetail ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Organization->shippingAddressDetail->post_office_box)))) : null,
                     'organisation_id' => $Organization->id,
+                    'created_at' => $Organization->Document ? $Organization->Document->create_time ?? 1 : 1,
+                    'updated_at' => $Organization->Document ? $Organization->Document->last_edit_time ?? 1 : 1,
                 ]);
             }
             $progress->advance();
@@ -301,12 +314,16 @@ class MigrateUsers extends Command
                 if (LeadsSources::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Lead->leadSourceOption->description)))))->count() == 0) {
                     LeadsSources::create([
                         'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Lead->leadSourceOption->description)))),
+                        'u_id' => (Organisations::count() + 1),
+                        'tenant_id' => 1,
                     ]);
                 }
             } else {
                 if (LeadsSources::where('name', "-")->count() == 0) {
                     LeadsSources::create([
                         'name' => "-",
+                        'u_id' => (Organisations::count() + 1),
+                        'tenant_id' => 1,
                     ]);
                 }
             }
@@ -328,11 +345,10 @@ class MigrateUsers extends Command
                 'id' => $Lead->id,
                 'tenant_id' => 1,
                 'location_id' => $Lead->Document ? ($Lead->Document->location_id) : null,
-                'assigned_user_id' => 1,
+                'assigned_user_id' => $Lead->Document ? $Lead->Document->user_id ?? 1 : 1,
                 'lead_source_id' => $Lead->leadSourceOption ? LeadsSources::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Lead->leadSourceOption->description)))))->first()->id : null,
                 'lead_status_id' => $Lead->leadStatusOption ? LeadsStatuses::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Lead->leadStatusOption->description)))))->first()->id : null,
                 'organisation_id' => $Lead->person ? ($Lead->person->organization ? Organisations::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Lead->person->organization->name)))))->first()->id : null) : null,
-                'name' => $Lead->person ? str_replace("'", "", str_replace('"', '', $Lead->person->first_name)) . " " . ($Lead->person->reachDetail ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Lead->person->reachDetail->second_phone)))) . " " : null) . ($Lead->person->reachDetail ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Lead->person->reachDetail->third_phone)))) . " " : null) . preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Lead->person->last_name)))) : null,
                 'email' => $Lead->person ? ($Lead->person->reachDetail ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Lead->person->reachDetail->email)))) ?? "-" : "-") : "-",
                 'phone' => $Lead->person ? ($Lead->person->reachDetail ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Lead->person->reachDetail->phone)))) ?? '-' : '-') : '-',
                 'mobile_number' => $Lead->person ? ($Lead->person->reachDetail ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Lead->person->reachDetail->mobile)))) : null) : null,
@@ -342,6 +358,12 @@ class MigrateUsers extends Command
                 'description' => str_replace("'", "", str_replace('"', '', $Lead->description)),
                 'is_converted' => $Lead->converted_to_contact,
                 'payload' => null,
+                'u_id' => (Leads::count() + 1),
+                'first_name' => $Lead->person ? preg_replace('/[\x00-\x1F\x7F]/', '', preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Lead->person->first_name)))) : null,
+                'last_name' => $Lead->person ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Lead->person->last_name)))) : null,
+                'organisation_name' => $Lead->person ? ($Lead->person->organization ? Organisations::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Lead->person->organization->name)))))->first()->name : null) : null,
+                'created_at' => $Lead->Document ? $Lead->Document->create_time ?? 1 : 1,
+                'updated_at' => $Lead->Document ? $Lead->Document->last_edit_time ?? 1 : 1,
             ]);
             $progress->advance();
             unset($Lead);
@@ -355,8 +377,8 @@ class MigrateUsers extends Command
         foreach (Contact::get() as $Contact) {
             Contacts::create([
                 'id' => $Contact->id,
-                'mobile_number' => $Contact->person ? ($Contact->person->reachDetail ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Contact->person->reachDetail->phone)))) : null) : null,
-                'alt_mobile_number' => $Contact->person ? ($Contact->person->reachDetail ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Contact->person->reachDetail->mobile)))) : null) : null,
+                'mobile_number' => $Contact->person ? ($Contact->person->reachDetail ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Contact->person->reachDetail->mobile)))) : null) : null,
+                'alt_mobile_number' => $Contact->person ? ($Contact->person->reachDetail ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Contact->person->reachDetail->phone)))) : null) : null,
                 'type' => 'SMEs',
                 'company_id' => 1,
                 'tax_rate' => $Contact->is_tax_free ? 0 : ($Contact->tax_number == "" ? 0.160 : $Contact->tax_number ?? 0.160),
@@ -365,8 +387,8 @@ class MigrateUsers extends Command
                 'job_title' => $Contact->person ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Contact->person->job_title)))) : null,
                 'description' => str_replace("'", "", str_replace('"', '', $Contact->description)),
                 'primary_fax' => $Contact->person ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Contact->person->fax)))) : null,
-                'creator_id' => null,
-                'assigned_user_id' => 1,
+                'creator_id' => $Contact->Document ? $Contact->Document->creator_id ?? 1 : 1,
+                'assigned_user_id' => $Contact->Document ? $Contact->Document->user_id ?? 1 : 1,
                 'organisation_id' => $Contact->person ? $Contact->person->organization_id : null,
                 'tenant_id' => 1,
                 'lead_id' => $Contact->lead_id,
@@ -376,8 +398,12 @@ class MigrateUsers extends Command
                 'location_id' => $Contact->Document ? ($Contact->Document->location_id) : null,
                 'first_name' => $Contact->person ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Contact->person->first_name)))) : null,
                 'last_name' => $Contact->person ? preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Contact->person->last_name)))) : null,
-                'u_id' => null,
+                'u_id' => (Contacts::count() + 1),
                 'account_number' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Contact->account_number)))),
+                'nationality_id',
+                'nationality_number',
+                'created_at' => $Contact->Document ? $Contact->Document->create_time ?? 1 : 1,
+                'updated_at' => $Contact->Document ? $Contact->Document->last_edit_time ?? 1 : 1,
             ]);
             if ($Contact->person) {
                 ContactEmails::create([
@@ -411,6 +437,8 @@ class MigrateUsers extends Command
                             'shipping_city' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Contact->person->organization->shippingAddressDetail->city)))),
                             'shipping_p_o_box' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $Contact->person->organization->shippingAddressDetail->post_office_box)))),
                             'contact_id' => $Contact->id,
+                            'created_at' => $Contact->Document ? $Contact->Document->create_time ?? 1 : 1,
+                            'updated_at' => $Contact->Document ? $Contact->Document->last_edit_time ?? 1 : 1,
                         ]);
                     }
                 }
@@ -430,6 +458,7 @@ class MigrateUsers extends Command
                     SupplierCategories::create([
                         'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $SupplierOrganization->supplierCategoryOption->description)))),
                         'tenant_id' => 1,
+                        'u_id' => (SupplierCategories::count() + 1),
                     ]);
                 }
             } else {
@@ -437,6 +466,7 @@ class MigrateUsers extends Command
                     SupplierCategories::create([
                         'name' => "-",
                         'tenant_id' => 1,
+                        'u_id' => (SupplierCategories::count() + 1),
                     ]);
                 }
             }
@@ -445,7 +475,7 @@ class MigrateUsers extends Command
                 'id' => $SupplierOrganization->id,
                 'location_id' => $SupplierOrganization->Document ? ($SupplierOrganization->Document->location_id) : null,
                 'supplier_category_id' => $SupplierOrganization->supplierCategoryOption ? SupplierCategories::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $SupplierOrganization->supplierCategoryOption->description)))))->first()->id : SupplierCategories::where('name', "-")->first()->id,
-                'assigned_user_id' => 1,
+                'assigned_user_id' => $SupplierOrganization->Document ? $SupplierOrganization->Document->user_id ?? 1 : 1,
                 'tenant_id' => 1,
                 'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $SupplierOrganization->name)))),
                 'description' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $SupplierOrganization->description)))),
@@ -462,8 +492,10 @@ class MigrateUsers extends Command
                 'starting_balance' => $SupplierOrganization->starting_balance,
                 'starting_balance_date' => $SupplierOrganization->starting_balance_date,
                 'currency_id' => $SupplierOrganization->currency ? (Currencies::where('code', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $SupplierOrganization->currency->currency_code)))))->first()->id) : null,
-                'u_id' => null,
+                'u_id' => (SupplierOrganisations::count() + 1),
                 'account_number' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $SupplierOrganization->account_number)))),
+                'created_at' => $SupplierOrganization->Document ? $SupplierOrganization->Document->create_time ?? 1 : 1,
+                'updated_at' => $SupplierOrganization->Document ? $SupplierOrganization->Document->last_edit_time ?? 1 : 1,
             ]);
             if ($SupplierOrganization->addressDetail) {
                 SupplierOrganisationAddresses::create([
@@ -474,6 +506,8 @@ class MigrateUsers extends Command
                     'billing_city' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $SupplierOrganization->city)))),
                     'billing_p_o_box' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $SupplierOrganization->post_office_box)))),
                     'supplier_organisation_id' => $SupplierOrganization->id,
+                    'created_at' => $SupplierOrganization->Document ? $SupplierOrganization->Document->create_time ?? 1 : 1,
+                    'updated_at' => $SupplierOrganization->Document ? $SupplierOrganization->Document->last_edit_time ?? 1 : 1,
                 ]);
             }
             $progress->advance();
@@ -491,6 +525,7 @@ class MigrateUsers extends Command
                     SupplierCategories::create([
                         'name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $SupplierContact->supplierCategoryOption->description)))),
                         'tenant_id' => 1,
+                        'u_id' => (SupplierCategories::count() + 1),
                     ]);
                 }
             } else {
@@ -498,6 +533,7 @@ class MigrateUsers extends Command
                     SupplierCategories::create([
                         'name' => "-",
                         'tenant_id' => 1,
+                        'u_id' => (SupplierCategories::count() + 1),
                     ]);
                 }
             }
@@ -507,7 +543,7 @@ class MigrateUsers extends Command
                 'location_id' => $SupplierContact->Document ? ($SupplierContact->Document->location_id) : null,
                 'supplier_category_id' => $SupplierContact->supplierCategoryOption ? SupplierCategories::where('name', preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $SupplierContact->supplierCategoryOption->description)))))->first()->id : SupplierCategories::where('name', "-")->first()->id,
                 'supplier_organisation_id' => $SupplierContact->supplier_organization_id,
-                'assigned_user_id' => 1,
+                'assigned_user_id' => $SupplierContact->Document ? $SupplierContact->Document->user_id ?? 1 : 1,
                 'tenant_id' => 1,
                 'first_name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $SupplierContact->first_name)))),
                 'last_name' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $SupplierContact->last_name)))),
@@ -524,6 +560,9 @@ class MigrateUsers extends Command
                 'starting_balance_date' => $SupplierContact->starting_balance_date,
                 'currency_id' => $currency,
                 'account_number' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $SupplierContact->account_number)))),
+                'created_at' => $SupplierContact->Document ? $SupplierContact->Document->create_time ?? 1 : 1,
+                'updated_at' => $SupplierContact->Document ? $SupplierContact->Document->last_edit_time ?? 1 : 1,
+                'u_id' => (SupplierContacts::count() + 1),
             ]);
             if ($SupplierContact->addressDetail) {
                 SupplierContactAddresses::create([
@@ -534,6 +573,8 @@ class MigrateUsers extends Command
                     'billing_city' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $SupplierContact->city)))),
                     'billing_p_o_box' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $SupplierContact->post_office_box)))),
                     'supplier_contact_id' => $SupplierContact->id,
+                    'created_at' => $SupplierContact->Document ? $SupplierContact->Document->create_time ?? 1 : 1,
+                    'updated_at' => $SupplierContact->Document ? $SupplierContact->Document->last_edit_time ?? 1 : 1,
                 ]);
             }
             $progress->advance();
@@ -552,10 +593,13 @@ class MigrateUsers extends Command
                 'note' => null,
                 'date' => $ToDo->time,
                 'is_completed' => preg_replace('/[\x00-\x1F\x7F]/', '',  preg_replace('/\s+/', ' ', str_replace("'", "", str_replace('"', '', $ToDo->is_completed)))),
-                'creator_id' => 1,
-                'assigned_user_id' => 1,
+                'creator_id' => $ToDo->Document ? $ToDo->Document->creator_id ?? 1 : 1,
+                'assigned_user_id' => $ToDo->Document ? $ToDo->Document->user_id ?? 1 : 1,
                 'tenant_id' => 1,
-                'location_id' => null,
+                'location_id' => $ToDo->Document ? $ToDo->Document->location_id : null,
+                'created_at' => $ToDo->Document ? $ToDo->Document->create_time ?? 1 : 1,
+                'updated_at' => $ToDo->Document ? $ToDo->Document->last_edit_time ?? 1 : 1,
+                'u_id' => (ToDos::count() + 1),
             ]);
             $progress->advance();
             unset($ToDo);

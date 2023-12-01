@@ -48,6 +48,7 @@ class MigrateTasks extends Command
                     TaskPriorities::create([
                         'name' => str_replace("'","",str_replace('"','',$Task->taskPriorityOption->description)),
                         'tenant_id' => 1,
+                        'u_id' => (TaskPriorities::count() + 1),
                     ]);
                 }
             } else {
@@ -55,6 +56,7 @@ class MigrateTasks extends Command
                     TaskPriorities::create([
                         'name' => "-",
                         'tenant_id' => 1,
+                        'u_id' => (TaskPriorities::count() + 1),
                     ]);
                 }
             }
@@ -63,6 +65,7 @@ class MigrateTasks extends Command
                     TaskStatuses::create([
                         'name' => str_replace("'","",str_replace('"','',$Task->taskStatusOption->description)),
                         'tenant_id' => 1,
+                        'u_id' => (TaskStatuses::count() + 1),
                     ]);
                 }
             } else {
@@ -70,6 +73,7 @@ class MigrateTasks extends Command
                     TaskStatuses::create([
                         'name' => "-",
                         'tenant_id' => 1,
+                        'u_id' => (TaskStatuses::count() + 1),
                     ]);
                 }
             }
@@ -81,10 +85,13 @@ class MigrateTasks extends Command
                 'status_id' => $Task->taskStatusOption ? TaskStatuses::where('name', str_replace("'","",str_replace('"','',$Task->taskStatusOption->description)))->first()->id : TaskStatuses::where('name', "-")->first()->id,
                 'start_time' => str_replace("'","",str_replace('"','',$Task->start_time)),
                 'end_time' => str_replace("'","",str_replace('"','',$Task->end_time)),
-                'assigned_user_id' => 1,
+                'assigned_user_id' => $Task->document ? $Task->document->user_id??1 : 1,
                 'tenant_id' => 1,
+                'u_id' => (Tasks::count() + 1),
                 'task_priority_id' => $Task->taskPriorityOption ? TaskPriorities::where('name', str_replace("'","",str_replace('"','',$Task->taskPriorityOption->description)))->first()->id : TaskPriorities::where('name', "-")->first()->id,
                 'related_document' => $Task->document ? (DocumentAttachment::where('document_id', $Task->document->id)->first() ? (str_replace("'", "", str_replace('"', '', DocumentAttachment::where('document_id', $Task->document->id)->first()->file_name))) : null) : null,
+                'created_at' => ($Task->document ? ($Task->document->create_time) : null),
+                'updated_at' => ($Task->document ? ($Task->document->last_edit_time) : null),
             ]);
             $progress->advance();
             unset($Task);

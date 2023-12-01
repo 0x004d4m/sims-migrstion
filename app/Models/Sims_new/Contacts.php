@@ -15,7 +15,7 @@ class Contacts extends Model
 
 	protected $connection = 'sims_new';
 
-	protected $fillable = ['id','mobile_number','alt_mobile_number','type','deleted_at','created_at','updated_at','company_id','tax_rate','tax_number','tax_free','job_title','description','primary_fax','creator_id','assigned_user_id','organisation_id','tenant_id','lead_id','starting_balance','starting_balance_date','currency_id','location_id','first_name','last_name','u_id','account_number'];
+	protected $fillable = ['id','mobile_number','alt_mobile_number','type','deleted_at','created_at','updated_at','company_id','tax_rate','tax_number','tax_free','job_title','description','primary_fax','creator_id','assigned_user_id','organisation_id','tenant_id','lead_id','starting_balance','starting_balance_date','currency_id','location_id','first_name','last_name','u_id','account_number','nationality_id','nationality_number'];
 
 
 	public function assignedUser(){return $this->belongsTo(Users::class, 'assigned_user_id', 'id');}

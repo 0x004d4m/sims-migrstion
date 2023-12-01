@@ -12,6 +12,6 @@ class LeadsSources extends Model
 
 	protected $connection = 'sims_new';
 
-	protected $fillable = ['id','name','created_at','updated_at'];
+	protected $fillable = ['id','name','created_at','updated_at','u_id','tenant_id'];
 
 }

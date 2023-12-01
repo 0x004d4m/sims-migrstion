@@ -15,7 +15,7 @@ class Organisations extends Model
 
 	protected $connection = 'sims_new';
 
-	protected $fillable = ['id','name','description','industry_id','tax_free','primary_email','primary_mobile','primary_phone','primary_fax','website','brand_name','registration_number','tax_number','tax_rate','creator_id','assigned_user_id','tenant_id','active','created_at','updated_at','deleted_at','starting_balance','starting_balance_date','currency_id','location_id','u_id','account_number'];
+	protected $fillable = ['id','name','description','industry_id','tax_free','primary_email','primary_mobile','primary_phone','primary_fax','website','brand_name','registration_number','tax_number','tax_rate','creator_id','assigned_user_id','tenant_id','active','created_at','updated_at','deleted_at','starting_balance','starting_balance_date','currency_id','location_id','u_id','account_number','second_primary_mobile'];
 
 
 	public function assignedUser(){return $this->belongsTo(Users::class, 'assigned_user_id', 'id');}
